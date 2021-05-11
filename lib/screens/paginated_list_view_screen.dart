@@ -12,18 +12,18 @@ import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_add_user.dart'
 import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_filters.dart';
 import 'package:flutter_userapp_demo/utility/utility.dart';
 
-//Application 
-class Application2 extends StatefulWidget {
+//Paginated ListView Screen
+class PaginatedListViewScreen extends StatefulWidget {
   @override
-  _Application2State createState() =>_Application2State();
+  _PaginatedListViewScreenState createState() =>_PaginatedListViewScreenState();
 }
 
-class _Application2State extends State<Application2> {
+class _PaginatedListViewScreenState extends State<PaginatedListViewScreen> {
 
-  final GlobalKey<_HomePageState> _mainScreenState = GlobalKey<_HomePageState>();
+  final GlobalKey<_PaginatedListViewState> _paginatedListViewState = GlobalKey<_PaginatedListViewState>();
   void applyFilters(HashMap<String,String> newFIlters)
   {
-    _mainScreenState.currentState._applyFilters(newFIlters);
+    _paginatedListViewState.currentState._applyFilters(newFIlters);
   }
 
   @override
@@ -44,7 +44,7 @@ class _Application2State extends State<Application2> {
                       builder: (BuildContext context) => PopUpDialogFilters(
                         context:context,
                         callback:applyFilters,
-                        filters: _mainScreenState.currentState.filters
+                        filters: _paginatedListViewState.currentState.filters
                       ),
                     );
                   }
@@ -54,7 +54,7 @@ class _Application2State extends State<Application2> {
             
           ],
         ),
-        body: HomePage(key:_mainScreenState),
+        body: PaginatedListView(key:_paginatedListViewState),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
               showDialog(
@@ -70,14 +70,14 @@ class _Application2State extends State<Application2> {
   }
 }
 
-//MainScreen (Scroll View with paging and users data)
-class HomePage extends StatefulWidget{
+//Paginated ListView (Scroll View with paging and users data)
+class PaginatedListView extends StatefulWidget{
 
-  HomePage({Key key}) : super(key:key);   
+  PaginatedListView({Key key}) : super(key:key);   
   @override
-  _HomePageState createState() =>_HomePageState();
+  _PaginatedListViewState createState() =>_PaginatedListViewState();
 }
-class _HomePageState extends State<HomePage>{
+class _PaginatedListViewState extends State<PaginatedListView>{
 
   int pageNo;
   int totalPages ;
