@@ -7,19 +7,19 @@ class Pagination extends StatefulWidget{
   Pagination({this.sc}) ;
   
   @override
-  _MyPagination createState() => _MyPagination(scrollController: sc);
+  _PaginationState createState() => _PaginationState(scrollController: sc);
 }
 
-class _MyPagination extends State<Pagination>{
+class _PaginationState extends State<Pagination>{
 
   int _pageNo = 1;
   ScrollController scrollController;
-  _MyPagination({this.scrollController});
+  _PaginationState({this.scrollController});
 
   _scrollListner(){
     if(this.mounted)
       setState(() {
-          _pageNo=(( (scrollController.position.pixels))/(20*130)).toInt()+1;
+          _pageNo=( (scrollController.position.pixels))~/(20*130)+1;
       });
   }
 
@@ -27,14 +27,6 @@ class _MyPagination extends State<Pagination>{
   void initState() { 
     super.initState();
     scrollController.addListener(_scrollListner);
-  }
-
-
-  void setPageNo(int pageNo)
-  {
-    setState(() {
-      _pageNo = pageNo;
-    });
   }
 
   @override
@@ -47,9 +39,7 @@ class _MyPagination extends State<Pagination>{
             decoration: new BoxDecoration(color: Colors.grey[200]),
             child: new GestureDetector(
               child: Text('Current Page ${_pageNo}'),
-              onTap: (){
-
-              },
+              onTap: (){},
             )
             )
           );

@@ -1,15 +1,42 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../models/User.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:toast/toast.dart';
+import 'package:flutter_userapp_demo/constants/constants.dart';
+import 'package:flutter_userapp_demo/models/user.dart';
 
-Future<void> addUserRequest(User user,BuildContext context) async {
-    final http.Response response = await http.post("https://gorest.co.in/public-api/users",
+class PopUpDialogAddUser extends StatefulWidget{
+  final BuildContext context;
+
+  PopUpDialogAddUser({this.context});
+  
+  @override
+  _PopUpDialogAddUserState createState() => _PopUpDialogAddUserState(context:context);
+}
+
+class _PopUpDialogAddUserState extends State<PopUpDialogAddUser>{
+
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+
+  bool _isActive = false;
+  String dropdownValue = 'Gender';
+  BuildContext context;
+
+  _PopUpDialogAddUserState({this.context});
+  
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> _addUserRequest(User user,BuildContext context) async {
+    final http.Response response = await http.post(Constants.userAddURL,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization':'Bearer 75d4b33b09d291e83932a38ff386a1eeee39b813d355d88bc09a30dd9f9489ef'
+        'Authorization':'Bearer ${Constants.token}'
       },
       body: jsonEncode(<String, String>{
         "name":user.name,
@@ -33,39 +60,16 @@ Future<void> addUserRequest(User user,BuildContext context) async {
         Toast.show("Something went wrong please try again!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER);
       }
     }
-}
-
-class PopUpDialogAddUser extends StatefulWidget{
-  final BuildContext context;
-
-  PopUpDialogAddUser({this.context});
-  
-  @override
-  _MyPopUpDialogAddUser createState() => _MyPopUpDialogAddUser(context:context);
-}
-
-class _MyPopUpDialogAddUser extends State<PopUpDialogAddUser>{
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  bool _isActive = false;
-  String dropdownValue = 'Gender';
-  BuildContext context;
-
-  _MyPopUpDialogAddUser({this.context});
-  
-  @override
-  void initState() {
-    super.initState();
   }
 
-  void addUser()async{
+  void _addUser()async{
     User user = new User(
         name:nameController.text,
         email:emailController.text,
         status: (_isActive)?"Active":"Inactive",
         gender: dropdownValue
       );
-      addUserRequest(user, context);
+      _addUserRequest(user, context);
   }
 
   @override
@@ -134,7 +138,7 @@ class _MyPopUpDialogAddUser extends State<PopUpDialogAddUser>{
       actions: <Widget>[
         new TextButton(
           onPressed : (){
-            addUser();
+            _addUser();
              },
           style: TextButton.styleFrom(
             primary:Theme.of(context).primaryColor

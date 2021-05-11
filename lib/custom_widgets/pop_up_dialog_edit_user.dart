@@ -1,15 +1,52 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../models/User.dart';
+import 'package:flutter_userapp_demo/constants/constants.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:toast/toast.dart';
+import 'package:flutter_userapp_demo/models/user.dart';
 
-Future<User> updateUserRequest(User user,BuildContext context) async {
-    final http.Response response = await http.put("https://gorest.co.in/public-api/users/${user.id}",
+
+
+
+class PopUpDialogEditUser extends StatefulWidget{
+  BuildContext context;
+  User user;
+
+  var callback;
+  
+  PopUpDialogEditUser({this.context,this.user,this.callback});
+  
+  @override
+  _PopUpDialogEditUserState createState() => _PopUpDialogEditUserState(context:context,user: user,callback:callback);
+}
+
+class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
+  User user;
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  bool _isActive = false;
+  String dropdownValue = 'Gender';
+  BuildContext context;
+  var callback ;
+
+  _PopUpDialogEditUserState({this.context,this.user,this.callback});
+ 
+  @override
+  void initState() {
+    super.initState();
+    nameController.text = user.name;
+    emailController.text = user.email;
+    _isActive = (user.status=="Active")?true:false;
+    dropdownValue = user.gender;
+  }
+
+  Future<User> _updateUserRequest(User user,BuildContext context) async {
+    final http.Response response = await http.put("${Constants.userEditURL}/${user.id}",
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization':'Bearer 75d4b33b09d291e83932a38ff386a1eeee39b813d355d88bc09a30dd9f9489ef'
+        'Authorization':'Bearer ${Constants.token}'
       },
       body: jsonEncode(<String, String>{
         "name":user.name,
@@ -41,42 +78,9 @@ Future<User> updateUserRequest(User user,BuildContext context) async {
       }
       return null;
     }
-    
-}
-
-class PopUpDialog extends StatefulWidget{
-  BuildContext context;
-  User user;
-
-  var callback;
-  
-  PopUpDialog({this.context,this.user,this.callback});
-  
-  @override
-  _MyPopUpDialog createState() => _MyPopUpDialog(context:context,user: user,callback:callback);
-}
-
-class _MyPopUpDialog extends State<PopUpDialog>{
-  User user;
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  bool _isActive = false;
-  String dropdownValue = 'Gender';
-  BuildContext context;
-  var callback ;
-
-  _MyPopUpDialog({this.context,this.user,this.callback});
- 
-  @override
-  void initState() {
-    super.initState();
-    nameController.text = user.name;
-    emailController.text = user.email;
-    _isActive = (user.status=="Active")?true:false;
-    dropdownValue = user.gender;
   }
 
-  void updateUser()async{
+  void _updateUser()async{
     User updatedUser = new User(
         id:user.id,
         name:(nameController.text)??"",
@@ -84,7 +88,7 @@ class _MyPopUpDialog extends State<PopUpDialog>{
         status: (_isActive)?"Active":"Inactive",
         gender: dropdownValue
       );
-      updateUserRequest(updatedUser, context).then((value) => { 
+      _updateUserRequest(updatedUser, context).then((value) => { 
         if(value!=null) 
           callback(value),
         Navigator.of(context).pop()
@@ -157,7 +161,7 @@ class _MyPopUpDialog extends State<PopUpDialog>{
       actions: <Widget>[
         new TextButton(
           onPressed : (){
-            updateUser();
+            _updateUser();
              },
           style: TextButton.styleFrom(
             primary:Theme.of(context).primaryColor
@@ -176,6 +180,4 @@ class _MyPopUpDialog extends State<PopUpDialog>{
       ],
     );
   }
-
-
 }

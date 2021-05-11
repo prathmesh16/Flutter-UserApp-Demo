@@ -13,34 +13,25 @@ class PopUpDialogFilters extends StatefulWidget
   PopUpDialogFilters({this.context,this.callback,this.filters});
 
   @override
-  _MyPopUpDialogFilters createState() => _MyPopUpDialogFilters(context: context,callback:callback,filters:filters);
+  _PopUpDialogFiltersState createState() => _PopUpDialogFiltersState(context: context,callback:callback,filters:filters);
 }
 
-class _MyPopUpDialogFilters extends State<PopUpDialogFilters>
+class _PopUpDialogFiltersState extends State<PopUpDialogFilters>
 {
   final BuildContext context;
   HashMap<String,String> filters;
   HashMap<String,String> cpyFilters = new HashMap<String,String>();
   var callback;
 
-_MyPopUpDialogFilters({this.context,this.callback,this.filters});
+_PopUpDialogFiltersState({this.context,this.callback,this.filters});
 
   String _genderFilter = "None";
   String _statusFilter = "None";
+  
   @override
   void initState() {
     super.initState();
-    // for(int i=0;i<filters.length;i++)
-    // {
-    //   if(filters[i][0]=="gender")
-    //   {
-    //     _genderFilter=filters[i][1];
-    //   }
-    //   if(filters[i][0]=="status")
-    //   {
-    //     _statusFilter=filters[i][1];
-    //   }
-    // }
+
     filters.forEach((key, value) {
       if(key == "status")
         _statusFilter=value;
@@ -50,7 +41,7 @@ _MyPopUpDialogFilters({this.context,this.callback,this.filters});
     });
   }
 
-  void handleGenderFilter(String value)
+  void _handleGenderFilter(String value)
   {
     if(value == "None")
     {
@@ -65,7 +56,7 @@ _MyPopUpDialogFilters({this.context,this.callback,this.filters});
     });
   }
   
-  void handleStatusFilter(String value)
+  void _handleStatusFilter(String value)
   {
     if(value == "None")
     {
@@ -113,11 +104,11 @@ _MyPopUpDialogFilters({this.context,this.callback,this.filters});
                   selectedColor: Colors.grey,
                   onSelected: (bool selected){
                       if(selected){
-                        handleGenderFilter("Male");
+                        _handleGenderFilter("Male");
                       }
                       else
                       {
-                        handleGenderFilter("None");
+                        _handleGenderFilter("None");
                       }
                   }
                   ),
@@ -132,11 +123,11 @@ _MyPopUpDialogFilters({this.context,this.callback,this.filters});
                     selectedColor: Colors.grey,
                     onSelected: (bool selected){
                       if(selected){
-                        handleGenderFilter("Female");
+                        _handleGenderFilter("Female");
                       }
                       else
                       {
-                        handleGenderFilter("None");
+                        _handleGenderFilter("None");
                       }
                     }
                     ),
@@ -163,11 +154,11 @@ _MyPopUpDialogFilters({this.context,this.callback,this.filters});
                   selectedColor: Colors.grey,
                   onSelected: (bool selected){
                       if(selected){
-                        handleStatusFilter("Active");
+                        _handleStatusFilter("Active");
                       }
                       else
                       {
-                        handleStatusFilter("None");
+                        _handleStatusFilter("None");
                       }
                   }
                   ),
@@ -182,87 +173,16 @@ _MyPopUpDialogFilters({this.context,this.callback,this.filters});
                     selectedColor: Colors.grey,
                     onSelected: (bool selected){
                       if(selected){
-                        handleStatusFilter("Inactive");
+                        _handleStatusFilter("Inactive");
                       }
                       else
                       {
-                        handleStatusFilter("None");
+                        _handleStatusFilter("None");
                       }
                     }
                     ),
               ],
             ),
-            // Text("Gender"),
-            // Row(
-            //   children: <Widget>[
-            //     Radio<String>(
-            //         value: "Male",
-            //         groupValue: _genderFilter,
-            //         onChanged: (String value) {
-            //          handleGenderFilter(value);
-            //         },
-            //       ),
-            //     Text('Male  ',style: TextStyle(
-            //       fontSize: 12
-            //     ),),
-            //     Radio<String>(
-            //         value: "Female",
-            //         groupValue: _genderFilter,
-            //         onChanged: (String value) {
-            //          handleGenderFilter(value);
-            //         },
-            //       ),
-            //     Text('Female ',style: TextStyle(
-            //       fontSize: 12
-            //     ),),
-            //     Radio<String>(
-            //         value: "None",
-            //         groupValue: _genderFilter,
-            //         onChanged: (String value) {
-            //           handleGenderFilter(value);
-            //         },
-            //       ),
-            //     Text('None',style: TextStyle(
-            //       fontSize: 12
-            //     ),),
-            //   ],
-            // ),
-            // Text("Status"),
-            // Row(
-            //   children: <Widget>[
-            //     Radio<String>(
-            //         value: "Active",
-            //         groupValue: _statusFilter,
-            //         onChanged: (String value) {
-            //           handleStatusFilter(value);
-                      
-            //         },
-            //       ),
-            //     Text('Active',style: TextStyle(
-            //       fontSize: 12
-            //     ),),
-            //     Radio<String>(
-            //         value: "Inactive",
-            //         groupValue: _statusFilter,
-            //         onChanged: (String value) {
-            //           handleStatusFilter(value);
-            //         },
-            //       ),
-            //     Text('Inactive',style: TextStyle(
-            //       fontSize: 12
-            //     ),),
-            //     Radio<String>(
-            //         value: "None",
-            //         groupValue: _statusFilter,
-            //         onChanged: (String value) {
-            //           handleStatusFilter(value);
-            //         },
-            //       ),
-            //     Text('None',style: TextStyle(
-            //       fontSize: 12
-            //     ),),
-            //   ],
-            // )
             const Divider(
              height: 40,
              thickness: 1, 

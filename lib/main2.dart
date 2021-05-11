@@ -1,38 +1,29 @@
 import 'dart:collection';
-
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import './models/User.dart';
-import './myWidgets/UserCard.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import './myWidgets/PopUpDialogAddUser.dart';
-import './myWidgets/PopUpDialogFilters.dart';
-
-// void main() => runApp(MaterialApp(home:MyApp()));
-
-//converting response data into json list
-List<User> parseUsersList(String body){
-  var response = json.decode(body);
-  var data = response["data"] as List;
-  return data.map<User>((json) => User.fromJson(json)).toList();
-}
-
-
+import 'package:flutter/material.dart';
+import 'package:flutter_userapp_demo/constants/constants.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_userapp_demo/models/user.dart';
+import 'package:flutter_userapp_demo/custom_widgets/user_card.dart';
+import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_add_user.dart';
+import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_filters.dart';
+import 'package:flutter_userapp_demo/utility/utility.dart';
 
 //Application 
-class MyApp2 extends StatefulWidget {
+class Application2 extends StatefulWidget {
   @override
-  _MyApp2State createState() =>_MyApp2State();
+  _Application2State createState() =>_Application2State();
 }
 
-class _MyApp2State extends State<MyApp2> {
+class _Application2State extends State<Application2> {
 
-  final GlobalKey<_MainScreenState> _mainScreenState = GlobalKey<_MainScreenState>();
+  final GlobalKey<_HomePageState> _mainScreenState = GlobalKey<_HomePageState>();
   void applyFilters(HashMap<String,String> newFIlters)
   {
-    _mainScreenState.currentState.applyFilters(newFIlters);
+    _mainScreenState.currentState._applyFilters(newFIlters);
   }
 
   @override
@@ -58,22 +49,12 @@ class _MyApp2State extends State<MyApp2> {
                     );
                   }
                 ),
-                //  Positioned(
-                //   top: 0,
-                //   right: 0,
-                //   child: Container(
-                //     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                //     decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.red),
-                //     alignment: Alignment.center,
-                //     child: Text('0'),
-                //   ),
-                // )
               ],
             )
             
           ],
         ),
-        body: MainScreen(key:_mainScreenState),
+        body: HomePage(key:_mainScreenState),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
               showDialog(
@@ -90,21 +71,24 @@ class _MyApp2State extends State<MyApp2> {
 }
 
 //MainScreen (Scroll View with paging and users data)
-class MainScreen extends StatefulWidget{
+class HomePage extends StatefulWidget{
 
-  MainScreen({Key key}) : super(key:key);   
+  HomePage({Key key}) : super(key:key);   
   @override
-  _MainScreenState createState() =>_MainScreenState();
+  _HomePageState createState() =>_HomePageState();
 }
-class _MainScreenState extends State<MainScreen>{
+class _HomePageState extends State<HomePage>{
+
   int pageNo;
   int totalPages ;
   Future<List<User>> _futureUserList ;
   HashMap<String,String> filters = new HashMap<String, String>();
+
   //storage to cache users data
   var cachedUserList = <int, Future<List<User>>>{};
+
   //GET request to fetch users list
-  Future < List<User>> fetchUserList(HashMap<String,String> filters,int page) async{
+  Future < List<User>> _fetchUserList(HashMap<String,String> filters,int page) async{
     String str="&&";
     int i=0;
     
@@ -117,27 +101,28 @@ class _MainScreenState extends State<MainScreen>{
       i++;
     });
 
-    final http.Response response = await http.get("https://gorest.co.in/public-api/users?page=${page}${(str.length>2)?str:''}");
+    final http.Response response = await http.get("${Constants.userFetchURL}?page=${page}${(str.length>2)?str:''}");
     var tmp =json.decode(response.body);
     totalPages = tmp["meta"]["pagination"]["pages"];
       if(totalPages<pageNo)
       {
         pageNo=totalPages;
-        refreshPage();
+        _refreshPage();
       }
     return compute(parseUsersList,response.body);
   }
+  
   @override
   void initState() {
     super.initState();
 
     // initial load
     pageNo = 1;
-    _futureUserList = fetchUserList(filters,pageNo);
+    _futureUserList = _fetchUserList(filters,pageNo);
     cachedUserList[pageNo]=_futureUserList;
   }
 
-  void nextPage(){
+  void _nextPage(){
     setState(() {
       if(pageNo<totalPages)
         pageNo+=1;
@@ -147,13 +132,13 @@ class _MainScreenState extends State<MainScreen>{
       }
       else
       {
-        _futureUserList =fetchUserList(filters,pageNo);
+        _futureUserList =_fetchUserList(filters,pageNo);
         cachedUserList[pageNo]=_futureUserList;
       }
     });
   }
   
-  void previousPage()
+  void _previousPage()
   {
     setState(() {
       if(pageNo>1)
@@ -165,14 +150,14 @@ class _MainScreenState extends State<MainScreen>{
         }
         else
         {
-          _futureUserList =fetchUserList(filters,pageNo);
+          _futureUserList =_fetchUserList(filters,pageNo);
           cachedUserList[pageNo]=_futureUserList;
         }
       }
     });
   }
 
-  void changePage(int page)
+  void _changePage(int page)
   {
      setState(() {
       pageNo=page;
@@ -182,28 +167,27 @@ class _MainScreenState extends State<MainScreen>{
       }
       else
       {
-        _futureUserList =fetchUserList(filters,pageNo);
+        _futureUserList =_fetchUserList(filters,pageNo);
         cachedUserList[pageNo]=_futureUserList;
       }
     });
   }
 
-  void refreshPage(){
+  void _refreshPage(){
     setState(() {
-        _futureUserList =fetchUserList(filters,pageNo);
+        _futureUserList =_fetchUserList(filters,pageNo);
         cachedUserList[pageNo]=_futureUserList;
     });
   }
 
-  void applyFilters(HashMap<String,String> newFilters)
+  void _applyFilters(HashMap<String,String> newFilters)
   {
     setState(() {
       filters = newFilters;
       cachedUserList.clear();
-      _futureUserList = fetchUserList(filters,pageNo);
+      _futureUserList = _fetchUserList(filters,pageNo);
       cachedUserList[pageNo] = _futureUserList;
-    });
-   
+    }); 
   }
 
   @override
@@ -226,11 +210,11 @@ class _MainScreenState extends State<MainScreen>{
                         children: <Widget>[
                           IconButton(
                             icon: Icon(Icons.fast_rewind_sharp),
-                            onPressed:(){changePage(1);}
+                            onPressed:(){_changePage(1);}
                             ),
                           IconButton(
                             icon: Icon(Icons.arrow_back_ios),
-                            onPressed:previousPage
+                            onPressed:_previousPage
                             ),
                             SizedBox(
                               height: 50, 
@@ -249,7 +233,7 @@ class _MainScreenState extends State<MainScreen>{
                                       width: 25,
                                       child: Text('${pageNo+index}',style:(index==0)?TextStyle(color:Colors.blue[800],fontWeight: FontWeight.w900,fontSize: 20):null ,)
                                       ),
-                                    onTap:(){ changePage(pageNo+index); },
+                                    onTap:(){ _changePage(pageNo+index); },
                                   );
                                   else
                                     return new GestureDetector(
@@ -260,68 +244,19 @@ class _MainScreenState extends State<MainScreen>{
                                         width: 25,
                                         child: Text('${pageNo+index-4}',style:(index==4)?TextStyle(color:Colors.blue[800],fontWeight: FontWeight.w900,fontSize: 20):null ,)
                                         ),
-                                      onTap:(){ changePage(pageNo+index-4); },
+                                      onTap:(){ _changePage(pageNo+index-4); },
                                     );
                               } 
                             
                             ),
-                            ),
-                            // Container(
-                            //   height: 28,
-                            //   width: 25,
-                            //   child: Text(
-                            //     '${pageNo}',
-                            //     style: TextStyle(color:Colors.blue[800],fontWeight: FontWeight.w900,fontSize: 20) ,
-                            //     ),
-                            // ),
-                            // new GestureDetector(
-                            //   child: Container(
-                            //     height: 20,
-                            //     width: 20,
-                            //     child: Text('${pageNo+1}')
-                            //     ),
-                            //   onTap:(){ changePage(pageNo+1); },
-                            // ),
-                            // new GestureDetector(
-                            //  child: Container(
-                            //     height: 20,
-                            //     width: 20,
-                            //     child: Text('${pageNo+2}')
-                            //     ),
-                            //   onTap:(){ changePage(pageNo+2);},
-                            // ),
-                            // new GestureDetector(
-                            //  child: Container(
-                            //     height: 20,
-                            //     width: 20,
-                            //     child: Text('${pageNo+3}')
-                            //     ),
-                            //   onTap:(){ changePage(pageNo+3);},
-                            // ),
-                            // new GestureDetector(
-                            //   child: Container(
-                            //     height: 20,
-                            //     width: 20,
-                            //     child: Text('${pageNo+4}')
-                            //     ),
-                            //   onTap:(){ changePage(pageNo+4);},
-                            // ),
-                            // new GestureDetector(
-                            //   child: Card(child:Container(
-                            //     height: 30,
-                            //     width: 30,
-                            //     alignment: Alignment.center,
-                            //     child: Text('${pageNo+4}')
-                            //     )),
-                            //   onTap:(){ changePage(pageNo+4);},
-                            // ),
+                          ),
                           IconButton(
                             icon: Icon(Icons.arrow_forward_ios),
-                            onPressed:nextPage
+                            onPressed:_nextPage
                             ),
                           IconButton(
                             icon: Icon(Icons.fast_forward_sharp),
-                            onPressed:(){changePage(totalPages);}
+                            onPressed:(){_changePage(totalPages);}
                             ),
                         ],
                       ),
@@ -342,20 +277,16 @@ class _MainScreenState extends State<MainScreen>{
                                 print("inside delete");                                
                                 setState(() {
                                   users.removeAt(index);
-                                  // _futureUserList = Future.value(users);
-                                  // cachedUserList[pageNo] = _futureUserList;
                                 });
                                 
                                 return ;
                               }
+
                               bool flag= true;
-                              // for(List<String> filter in filters)
-                              // {
-                              //   if(!filter.contains(val.gender) && !filter.contains(val.status))
-                              //     flag = false; 
-                              // }
+
                               if(!filters.containsValue(val.gender) && !filters.containsValue(val.status))
                                 flag = false;
+
                               if(filters.length==0 || flag)
                               {
                                 cachedUserList[pageNo].then((value) => {
@@ -372,7 +303,7 @@ class _MainScreenState extends State<MainScreen>{
                               else
                               {
                                 setState(() {
-                                  _futureUserList = fetchUserList(filters,pageNo);
+                                  _futureUserList = _fetchUserList(filters,pageNo);
                                   cachedUserList[pageNo] = _futureUserList;
                                 });
                               }
@@ -382,7 +313,7 @@ class _MainScreenState extends State<MainScreen>{
                       ),
                     ],
                   ),
-                  onRefresh:()async{ refreshPage();},
+                  onRefresh:()async{ _refreshPage();},
                 );
                 } else if (snapshot.hasError) {
                   return Text("${snapshot.error}");

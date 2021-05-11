@@ -1,40 +1,32 @@
 import 'dart:collection';
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_userapp_demo/main2.dart';
-import 'package:flutter_userapp_demo/myWidgets/Pagination.dart';
-import 'dart:convert';
-import './models/User.dart';
-import './myWidgets/UserCard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import './myWidgets/PopUpDialogAddUser.dart';
-import './myWidgets/PopUpDialogFilters.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_userapp_demo/models/user.dart';
+import 'package:flutter_userapp_demo/main2.dart';
+import 'package:flutter_userapp_demo/custom_widgets/Pagination.dart';
+import 'package:flutter_userapp_demo/custom_widgets/user_card.dart';
+import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_add_user.dart';
+import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_filters.dart';
+import 'package:flutter_userapp_demo/constants/constants.dart';
+import 'package:flutter_userapp_demo/utility/utility.dart';
 
-void main() => runApp(MaterialApp(home:MyApp()));
+void main() => runApp(MaterialApp(home:Application()));
 
-//converting response data into json list
-List<User> parseUsersList(String body){
-  var response = json.decode(body);
-  var data = response["data"] as List;
-  return data.map<User>((json) => User.fromJson(json)).toList();
-}
-
-
-
-//Application Q
-class MyApp extends StatefulWidget {
+//Application
+class Application extends StatefulWidget {
   @override
-  _MyAppState createState() =>_MyAppState();
+  _ApplicationState createState() =>_ApplicationState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _ApplicationState extends State<Application> {
 
-  final GlobalKey<_MainScreenState> _mainScreenState = GlobalKey<_MainScreenState>();
+  final GlobalKey<_HomePageState> _mainScreenState = GlobalKey<_HomePageState>();
   void applyFilters(HashMap<String,String> newFIlters)
   {
-    _mainScreenState.currentState.applyFilters(newFIlters);
+    _mainScreenState.currentState._applyFilters(newFIlters);
   }
 
   @override
@@ -48,7 +40,7 @@ class _MyAppState extends State<MyApp> {
             new IconButton(
                   icon: Icon(Icons.autorenew_sharp,size: 30,),
                   onPressed: (){
-                     Navigator.of(context).push(MaterialPageRoute(builder: (context) => MyApp2()));
+                     Navigator.of(context).push(MaterialPageRoute(builder: (context) => Application2()));
                   }
                 ),
             new Stack(
@@ -66,22 +58,12 @@ class _MyAppState extends State<MyApp> {
                     );
                   }
                 ),
-                //  Positioned(
-                //   top: 0,
-                //   right: 0,
-                //   child: Container(
-                //     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                //     decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.red),
-                //     alignment: Alignment.center,
-                //     child: Text('0'),
-                //   ),
-                // )
               ],
             )
             
           ],
         ),
-        body: MainScreen(key:_mainScreenState),
+        body: HomePage(key:_mainScreenState),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
               showDialog(
@@ -98,13 +80,13 @@ class _MyAppState extends State<MyApp> {
 }
 
 //MainScreen (Scroll View with paging and users data)
-class MainScreen extends StatefulWidget{
+class HomePage extends StatefulWidget{
 
-  MainScreen({Key key}) : super(key:key);   
+  HomePage({Key key}) : super(key:key);   
   @override
-  _MainScreenState createState() =>_MainScreenState();
+  _HomePageState createState() =>_HomePageState();
 }
-class _MainScreenState extends State<MainScreen>{
+class _HomePageState extends State<HomePage>{
   int _pageNo;
   int totalPages ;
   bool _hasMore;
@@ -118,7 +100,7 @@ class _MainScreenState extends State<MainScreen>{
 
 
   //GET request to fetch users list
-  Future <void> fetchUserList(HashMap<String,String> filters) async{
+  Future <void> _fetchUserList(HashMap<String,String> filters) async{
     String str="&&";
     int i=0;
     
@@ -131,14 +113,13 @@ class _MainScreenState extends State<MainScreen>{
       i++;
     });
     try {
-      final http.Response response = await http.get("https://gorest.co.in/public-api/users?page=${_pageNo}${(str.length>2)?str:''}");
+      final http.Response response = await http.get("${Constants.userFetchURL}?page=${_pageNo}${(str.length>2)?str:''}");
       List<User> fetchedUsers =  parseUsersList(response.body);
       setState(() {
           _hasMore = fetchedUsers.length == _defaultUsersPerPageCount;
           _loading = false;
           _pageNo = _pageNo + 1;
           _users.addAll(fetchedUsers);
-          //Toast.show('${_pageNo}', context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
       });
     }
     catch(e)
@@ -151,11 +132,6 @@ class _MainScreenState extends State<MainScreen>{
   }
 
  ScrollController _scrollController ;
-  //  _scrollListner(){
-  //     // setState(() {
-  //     //     _p=(( (_scrollController.position.pixels))/(_defaultUsersPerPageCount*130)).toInt()+1;
-  //     // });
-  //  }
 
   @override
   void initState() {
@@ -167,37 +143,27 @@ class _MainScreenState extends State<MainScreen>{
     _loading = true;
     _pageNo = 1;
     _users = [];
-    fetchUserList(filters);
+    _fetchUserList(filters);
     _scrollController = ScrollController();
-    // _scrollController.addListener(_scrollListner);
-  }
-  void changePage(int page)
-  {
-    for(int i=_pageNo;i<=page;i++)
-    {
-      fetchUserList(filters);
-    }
-    _scrollController.jumpTo((page*130*_defaultUsersPerPageCount).toDouble());
   }
 
-void refreshPage(){
-  setState(() {
-    _users.clear();
-    _hasMore = true;
-    _error = false;
-    _loading = true;
-    _pageNo=1;
-  });
-  fetchUserList(filters);
-}
+  void _refreshPage(){
+    setState(() {
+      _users.clear();
+      _hasMore = true;
+      _error = false;
+      _loading = true;
+      _pageNo=1;
+    });
+    _fetchUserList(filters);
+  }
 
-   void applyFilters(HashMap<String,String> newFilters)
+   void _applyFilters(HashMap<String,String> newFilters)
    {
     setState(() {
       filters = newFilters;
-      refreshPage();
+      _refreshPage();
     });
-   
    }
  
   @override
@@ -219,7 +185,7 @@ void refreshPage(){
               setState(() {
                 _loading = true;
                 _error = false;
-                fetchUserList(filters);
+                _fetchUserList(filters);
               });
             },
             child: Padding(
@@ -242,7 +208,7 @@ void refreshPage(){
                     itemBuilder:(context,index){
                     
                         if (index == _users.length - _nextPageThreshold) {
-                          fetchUserList(filters);
+                          _fetchUserList(filters);
                         }
                           if (index == _users.length) {
                             if (_error) {
@@ -252,7 +218,7 @@ void refreshPage(){
                                   setState(() {
                                     _loading = true;
                                     _error = false;
-                                    fetchUserList(filters);
+                                    _fetchUserList(filters);
                                   });
                                 },
                                 child: Padding(
@@ -271,36 +237,36 @@ void refreshPage(){
                       return Container(
                         key: UniqueKey(),
                         child: new UserCard(context:context,user:_users[index],callback:(val){ 
-                                if(val==null)
-                                {
-                                  print("inside delete");                                
-                                  setState(() {
-                                    _users.removeAt(index);
-                                  });
-                                  return ;
-                                }
-                                bool flag= true;
-                                if(!filters.containsValue(val.gender) && !filters.containsValue(val.status))
-                                  flag = false;
-                                if(filters.length==0 || flag)
-                                {
-                                  for(int i=0;i<_users.length;i++)
-                                  {
-                                    if(_users[i].id==val.id)
-                                    {
-                                      _users[i]=val;
-                                    }
-                                  }
-                                }
-                                else
-                                {
-                                  refreshPage();
-                                }
+                          if(val==null)
+                          {
+                            print("inside delete");                                
+                            setState(() {
+                              _users.removeAt(index);
+                            });
+                            return ;
+                          }
+                          bool flag= true;
+                          if(!filters.containsValue(val.gender) && !filters.containsValue(val.status))
+                            flag = false;
+                          if(filters.length==0 || flag)
+                          {
+                            for(int i=0;i<_users.length;i++)
+                            {
+                              if(_users[i].id==val.id)
+                              {
+                                _users[i]=val;
+                              }
+                            }
+                          }
+                          else
+                          {
+                            _refreshPage();
+                          }
                         }),
                       );
                     }
                    ),
-                   onRefresh: ()async{ refreshPage();},
+                   onRefresh: ()async{ _refreshPage();},
                    ),
                  ),
                  Pagination(sc:_scrollController) 

@@ -1,29 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_userapp_demo/constants/constants.dart';
 import 'package:toast/toast.dart';
-import '../models/User.dart';
-import 'PopUpDialogEditUser.dart';
-
 import 'package:http/http.dart' as http;
+import 'package:flutter_userapp_demo/models/user.dart';
+import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_edit_user.dart';
 
-Future<void> deleteUser(BuildContext context,int id)async{
-  final http.Response response = await http.delete("https://gorest.co.in/public-api/users/${id}",
-  headers: <String, String>{
-        'Authorization':'Bearer 75d4b33b09d291e83932a38ff386a1eeee39b813d355d88bc09a30dd9f9489ef'
-      },
-  );
-
-  var res = json.decode(response.body);
-  if(res["code"]==204)
-  {
-    Toast.show("User deleted!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
-  }
-  else
-  {
-    Toast.show(res["data"]["message"], context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
-  }
-}
 
 
 class UserCard extends StatefulWidget{
@@ -32,31 +15,50 @@ class UserCard extends StatefulWidget{
   var callback;
 
   UserCard({this.context,this.user,this.callback});
+
   @override
-  _MyUserCard createState() => _MyUserCard(homeContext:context,user: user,callback:callback);
+  _UserCardState createState() => _UserCardState(homeContext:context,user: user,callback:callback);
 }
-class _MyUserCard extends State<UserCard>
+class _UserCardState extends State<UserCard>
 {
   BuildContext homeContext;
   User user;
   var callback;
-  _MyUserCard({this.homeContext,this.user,this.callback});
+  _UserCardState({this.homeContext,this.user,this.callback});
   
-  String limitName(String name)
+  Future<void> _deleteUser(BuildContext context,int id)async{
+    final http.Response response = await http.delete("${Constants.userDeleteURL}/${id}",
+    headers: <String, String>{
+          'Authorization':'Bearer ${Constants.token}'
+        },
+    );
+
+    var res = json.decode(response.body);
+    if(res["code"]==204)
+    {
+      Toast.show("User deleted!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+    }
+    else
+    {
+      Toast.show(res["data"]["message"], context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+    }
+  }
+
+  String _limitName(String name)
   {
       if(name.length>23)
         return name.substring(0,23)+"...";
       return name;  
   }
 
-  String limitEmail(String email)
+  String _limitEmail(String email)
   {
       if(email.length>35)
         return email.substring(0,35)+"...";
       return email;  
   }
  
-  Widget dropDownOptions()
+  Widget _dropDownOptions()
   {
     return new PopupMenuButton<String>(
       padding: EdgeInsets.zero,
@@ -66,7 +68,7 @@ class _MyUserCard extends State<UserCard>
         {
           showDialog(
             context: homeContext,
-            builder: (BuildContext context) => PopUpDialog(context:context,user: user,callback: (updatedUser){
+            builder: (BuildContext context) => PopUpDialogEditUser(context:context,user: user,callback: (updatedUser){
               setState((){
                 user=updatedUser;
                 callback(updatedUser);
@@ -76,7 +78,7 @@ class _MyUserCard extends State<UserCard>
         }
         if(ch=="Delete")
         {
-          deleteUser(context, user.id).then((value) => {
+          _deleteUser(context, user.id).then((value) => {
             callback(null)
           });
         }
@@ -113,10 +115,6 @@ class _MyUserCard extends State<UserCard>
             ),
           ],
         borderRadius: BorderRadius.circular(10),
-        // border: Border.all(
-        //   color: Colors.grey[300],
-        //   width: 1,
-        // ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -128,7 +126,7 @@ class _MyUserCard extends State<UserCard>
               Container(
                 margin: EdgeInsets.only(left:30),
                 child: Text(
-                  limitName('${user.name}'),
+                  _limitName('${user.name}'),
                   style: TextStyle(fontSize: 20),
                 )
               ),    
@@ -139,7 +137,7 @@ class _MyUserCard extends State<UserCard>
                     icon: Icon(Icons.info_outline,color: Colors.grey[500]),
                     alignment: Alignment.centerRight,
                   ),
-                  dropDownOptions(),
+                  _dropDownOptions(),
                 ],
               ),    
             ],
@@ -147,7 +145,7 @@ class _MyUserCard extends State<UserCard>
           Container(
             margin: EdgeInsets.only(left:30),
             alignment: AlignmentDirectional.centerStart,
-            child: Text(limitEmail('${user.email}'))
+            child: Text(_limitEmail('${user.email}'))
             ),
           Container(
             margin: EdgeInsets.only(top:10,left: 30,right:30),
