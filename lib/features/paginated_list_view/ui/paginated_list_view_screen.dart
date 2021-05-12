@@ -1,16 +1,16 @@
 import 'dart:collection';
-import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_userapp_demo/constants/constants.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_userapp_demo/models/user.dart';
-import 'package:flutter_userapp_demo/custom_widgets/user_card.dart';
-import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_add_user.dart';
-import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_filters.dart';
-import 'package:flutter_userapp_demo/utility/utility.dart';
+
+import '../../../data/network/api_service.dart';
+import './widgets/pagination.dart';
+import '../../common/models/user.dart';
+import '../../common/widgets/user_card.dart';
+import '../../common/widgets/pop_up_dialog_add_user.dart';
+import '../../common/widgets/pop_up_dialog_filters.dart';
+import '../models/paging_helper.dart';
 
 //Paginated ListView Screen
 class PaginatedListViewScreen extends StatefulWidget {
@@ -77,39 +77,20 @@ class PaginatedListView extends StatefulWidget{
   @override
   _PaginatedListViewState createState() =>_PaginatedListViewState();
 }
+
 class _PaginatedListViewState extends State<PaginatedListView>{
 
-  int pageNo;
-  int totalPages ;
+  PagingHelper _pagingHelper = new PagingHelper(pageNo: 1,totalPages: 0);
+
   Future<List<User>> _futureUserList ;
   HashMap<String,String> filters = new HashMap<String, String>();
 
   //storage to cache users data
   var cachedUserList = <int, Future<List<User>>>{};
 
-  //GET request to fetch users list
-  Future < List<User>> _fetchUserList(HashMap<String,String> filters,int page) async{
-    String str="&&";
-    int i=0;
-    
-    filters.forEach((key, value) {
-      if(i>0)
-      {
-        str+="&&";
-      }
-      str += key+"="+value;
-      i++;
-    });
-
-    final http.Response response = await http.get("${Constants.userFetchURL}?page=${page}${(str.length>2)?str:''}");
-    var tmp =json.decode(response.body);
-    totalPages = tmp["meta"]["pagination"]["pages"];
-      if(totalPages<pageNo)
-      {
-        pageNo=totalPages;
-        _refreshPage();
-      }
-    return compute(parseUsersList,response.body);
+  //Fetch paginated users list from API Service
+  Future<List<User>> _fetchUserList(HashMap<String,String> filters) async{
+    return APIService.fetchPaginatedUserList(filters, _pagingHelper,_refreshPage); 
   }
   
   @override
@@ -117,23 +98,23 @@ class _PaginatedListViewState extends State<PaginatedListView>{
     super.initState();
 
     // initial load
-    pageNo = 1;
-    _futureUserList = _fetchUserList(filters,pageNo);
-    cachedUserList[pageNo]=_futureUserList;
+    _pagingHelper.pageNo = 1;
+    _futureUserList = _fetchUserList(filters);
+    cachedUserList[_pagingHelper.pageNo]=_futureUserList;
   }
 
   void _nextPage(){
     setState(() {
-      if(pageNo<totalPages)
-        pageNo+=1;
-      if(cachedUserList[pageNo]!=null)
+      if(_pagingHelper.pageNo<_pagingHelper.totalPages)
+        _pagingHelper.pageNo+=1;
+      if(cachedUserList[_pagingHelper.pageNo]!=null)
       {
-        _futureUserList=cachedUserList[pageNo];
+        _futureUserList=cachedUserList[_pagingHelper.pageNo];
       }
       else
       {
-        _futureUserList =_fetchUserList(filters,pageNo);
-        cachedUserList[pageNo]=_futureUserList;
+        _futureUserList =_fetchUserList(filters);
+        cachedUserList[_pagingHelper.pageNo]=_futureUserList;
       }
     });
   }
@@ -141,17 +122,17 @@ class _PaginatedListViewState extends State<PaginatedListView>{
   void _previousPage()
   {
     setState(() {
-      if(pageNo>1)
+      if(_pagingHelper.pageNo>1)
       {
-        pageNo-=1;
-        if(cachedUserList[pageNo]!=null)
+        _pagingHelper.pageNo-=1;
+        if(cachedUserList[_pagingHelper.pageNo]!=null)
         {
-          _futureUserList=cachedUserList[pageNo];
+          _futureUserList=cachedUserList[_pagingHelper.pageNo];
         }
         else
         {
-          _futureUserList =_fetchUserList(filters,pageNo);
-          cachedUserList[pageNo]=_futureUserList;
+          _futureUserList =_fetchUserList(filters);
+          cachedUserList[_pagingHelper.pageNo]=_futureUserList;
         }
       }
     });
@@ -160,23 +141,23 @@ class _PaginatedListViewState extends State<PaginatedListView>{
   void _changePage(int page)
   {
      setState(() {
-      pageNo=page;
-      if(cachedUserList[pageNo]!=null)
+      _pagingHelper.pageNo=page;
+      if(cachedUserList[_pagingHelper.pageNo]!=null)
       {
-        _futureUserList=cachedUserList[pageNo];
+        _futureUserList=cachedUserList[_pagingHelper.pageNo];
       }
       else
       {
-        _futureUserList =_fetchUserList(filters,pageNo);
-        cachedUserList[pageNo]=_futureUserList;
+        _futureUserList =_fetchUserList(filters);
+        cachedUserList[_pagingHelper.pageNo]=_futureUserList;
       }
     });
   }
 
   void _refreshPage(){
     setState(() {
-        _futureUserList =_fetchUserList(filters,pageNo);
-        cachedUserList[pageNo]=_futureUserList;
+        _futureUserList =_fetchUserList(filters);
+        cachedUserList[_pagingHelper.pageNo]=_futureUserList;
     });
   }
 
@@ -185,8 +166,8 @@ class _PaginatedListViewState extends State<PaginatedListView>{
     setState(() {
       filters = newFilters;
       cachedUserList.clear();
-      _futureUserList = _fetchUserList(filters,pageNo);
-      cachedUserList[pageNo] = _futureUserList;
+      _futureUserList = _fetchUserList(filters);
+      cachedUserList[_pagingHelper.pageNo] = _futureUserList;
     }); 
   }
 
@@ -205,60 +186,12 @@ class _PaginatedListViewState extends State<PaginatedListView>{
                     physics: ScrollPhysics(),
                     children: <Widget>[
                       //Paging Row implementation
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          IconButton(
-                            icon: Icon(Icons.fast_rewind_sharp),
-                            onPressed:(){_changePage(1);}
-                            ),
-                          IconButton(
-                            icon: Icon(Icons.arrow_back_ios),
-                            onPressed:_previousPage
-                            ),
-                            SizedBox(
-                              height: 50, 
-                              child:  ListView.builder(
-                              scrollDirection: Axis.horizontal,
-
-                              shrinkWrap: true,
-                              itemCount:5,
-                              itemBuilder:(context,index){
-                                 if(totalPages-pageNo>5)
-                                  return new GestureDetector(
-                                    child: Container(
-                                      margin:EdgeInsets.all(5),
-                                      alignment: Alignment.center,
-                                      height: 25,
-                                      width: 25,
-                                      child: Text('${pageNo+index}',style:(index==0)?TextStyle(color:Colors.blue[800],fontWeight: FontWeight.w900,fontSize: 20):null ,)
-                                      ),
-                                    onTap:(){ _changePage(pageNo+index); },
-                                  );
-                                  else
-                                    return new GestureDetector(
-                                      child: Container(
-                                        margin:EdgeInsets.all(5),
-                                        alignment: Alignment.center,
-                                        height: 25,
-                                        width: 25,
-                                        child: Text('${pageNo+index-4}',style:(index==4)?TextStyle(color:Colors.blue[800],fontWeight: FontWeight.w900,fontSize: 20):null ,)
-                                        ),
-                                      onTap:(){ _changePage(pageNo+index-4); },
-                                    );
-                              } 
-                            
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.arrow_forward_ios),
-                            onPressed:_nextPage
-                            ),
-                          IconButton(
-                            icon: Icon(Icons.fast_forward_sharp),
-                            onPressed:(){_changePage(totalPages);}
-                            ),
-                        ],
+                      Pagination(
+                        totalPages: _pagingHelper.totalPages,
+                        pageNo: _pagingHelper.pageNo,
+                        callbackChangePage:_changePage ,
+                        callbackNextPage: _nextPage,
+                        callbackPreviousPage: _previousPage,
                       ),
                       //ListView of users data
                       Container(
@@ -289,7 +222,7 @@ class _PaginatedListViewState extends State<PaginatedListView>{
 
                               if(filters.length==0 || flag)
                               {
-                                cachedUserList[pageNo].then((value) => {
+                                cachedUserList[_pagingHelper.pageNo].then((value) => {
                                   for(int i=0;i<value.length;i++)
                                   {
                                     if(value[i].id==val.id)
@@ -297,14 +230,14 @@ class _PaginatedListViewState extends State<PaginatedListView>{
                                       value[i]=val
                                     }
                                   },
-                                  cachedUserList[pageNo] = Future<List<User>>.value(value)
+                                  cachedUserList[_pagingHelper.pageNo] = Future<List<User>>.value(value)
                                 });
                               }
                               else
                               {
                                 setState(() {
-                                  _futureUserList = _fetchUserList(filters,pageNo);
-                                  cachedUserList[pageNo] = _futureUserList;
+                                  _futureUserList = _fetchUserList(filters);
+                                  cachedUserList[_pagingHelper.pageNo] = _futureUserList;
                                 });
                               }
                             });

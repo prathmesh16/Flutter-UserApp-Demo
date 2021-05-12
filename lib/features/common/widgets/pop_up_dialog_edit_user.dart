@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_userapp_demo/constants/constants.dart';
+import 'package:flutter_userapp_demo/data/network/api_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:toast/toast.dart';
-import 'package:flutter_userapp_demo/models/user.dart';
+
+import '../../../data/constants/api_constants.dart';
+import '../../common/models/user.dart';
 
 
 
@@ -42,45 +44,8 @@ class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
     dropdownValue = user.gender;
   }
 
-  Future<User> _updateUserRequest(User user,BuildContext context) async {
-    final http.Response response = await http.put("${Constants.userEditURL}/${user.id}",
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization':'Bearer ${Constants.token}'
-      },
-      body: jsonEncode(<String, String>{
-        "name":user.name,
-        "email":user.email,
-        "status":user.status,
-        "gender":user.gender
-      }),
-    );
-    var tmp = json.decode(response.body);
-    if(tmp["code"]==200)
-    {
-       try{
-        Toast.show("User updated!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
-         return User.fromJson(tmp["data"]);
-      }
-      catch(e){
-        Toast.show("Something went wrong please try again!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER);
-        return null;
-      }
-     
-    }
-    else
-    {
-      try{
-        Toast.show(tmp["data"][0]["field"]+" "+tmp["data"][0]["message"], context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER);
-      }
-      catch(e){
-        Toast.show("Something went wrong please try again!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER);
-      }
-      return null;
-    }
-  }
-
-  void _updateUser()async{
+  void _updateUser(){
+    
     User updatedUser = new User(
         id:user.id,
         name:(nameController.text)??"",
@@ -88,10 +53,12 @@ class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
         status: (_isActive)?"Active":"Inactive",
         gender: dropdownValue
       );
-      _updateUserRequest(updatedUser, context).then((value) => { 
-        if(value!=null) 
-          callback(value),
-        Navigator.of(context).pop()
+
+      APIService.updateUserRequest(updatedUser, (message,user)=>{
+        if(user!=null)
+          callback(user),
+        Toast.show(message??"", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER),
+        Navigator.of(context).pop()  
       });
   }
 

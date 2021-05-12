@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_userapp_demo/models/user.dart';
+import '../../features/common/models/user.dart';
 
 //converting response data into json list
 List<User> parseUsersList(String body){

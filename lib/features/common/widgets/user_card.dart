@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_userapp_demo/constants/constants.dart';
+import 'package:flutter_userapp_demo/data/network/api_service.dart';
 import 'package:toast/toast.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_userapp_demo/models/user.dart';
-import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_edit_user.dart';
+
+import '../../common/models/user.dart';
+import './pop_up_dialog_edit_user.dart';
 
 
 
@@ -26,22 +24,11 @@ class _UserCardState extends State<UserCard>
   var callback;
   _UserCardState({this.homeContext,this.user,this.callback});
   
+  //Deletes user using API Service
   Future<void> _deleteUser(BuildContext context,int id)async{
-    final http.Response response = await http.delete("${Constants.userDeleteURL}/${id}",
-    headers: <String, String>{
-          'Authorization':'Bearer ${Constants.token}'
-        },
-    );
-
-    var res = json.decode(response.body);
-    if(res["code"]==204)
-    {
-      Toast.show("User deleted!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
-    }
-    else
-    {
-      Toast.show(res["data"]["message"], context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
-    }
+    await APIService.deleteUserRequest(id).then((message) => { 
+      Toast.show(message, context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM)
+    });
   }
 
   String _limitName(String name)
@@ -63,8 +50,8 @@ class _UserCardState extends State<UserCard>
     return new PopupMenuButton<String>(
       padding: EdgeInsets.zero,
       icon: Icon(Icons.more_vert,color: Colors.grey[500],),
-      onSelected: (String ch){
-        if(ch=="Edit")
+      onSelected: (String choice){
+        if(choice=="Edit")
         {
           showDialog(
             context: homeContext,
@@ -76,7 +63,7 @@ class _UserCardState extends State<UserCard>
             }),
           );
         }
-        if(ch=="Delete")
+        if(choice=="Delete")
         {
           _deleteUser(context, user.id).then((value) => {
             callback(null)

@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_userapp_demo/screens/lazy_list_view_screen.dart';
+import 'package:flutter_userapp_demo/features/lazy_list_view/ui/lazy_list_view_screen.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

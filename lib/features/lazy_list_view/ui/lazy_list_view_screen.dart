@@ -3,15 +3,14 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_userapp_demo/models/user.dart';
-import 'package:flutter_userapp_demo/screens/paginated_list_view_screen.dart';
-import 'package:flutter_userapp_demo/custom_widgets/Pagination.dart';
-import 'package:flutter_userapp_demo/custom_widgets/user_card.dart';
-import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_add_user.dart';
-import 'package:flutter_userapp_demo/custom_widgets/pop_up_dialog_filters.dart';
-import 'package:flutter_userapp_demo/constants/constants.dart';
-import 'package:flutter_userapp_demo/utility/utility.dart';
+import 'package:flutter_userapp_demo/data/network/api_service.dart';
+
+import '../../common/models/user.dart';
+import '../../paginated_list_view/ui/paginated_list_view_screen.dart';
+import 'widgets/pagination.dart';
+import '../../common/widgets/user_card.dart';
+import '../../common/widgets/pop_up_dialog_add_user.dart';
+import '../../common/widgets/pop_up_dialog_filters.dart';
 
 //Lazy ListView Sceen
 class LazyListViewScreen extends StatefulWidget {
@@ -96,27 +95,16 @@ class _LazyListViewState extends State<LazyListView>{
   HashMap<String,String> filters = new HashMap<String, String>();
 
 
-  //GET request to fetch users list
-  Future <void> _fetchUserList(HashMap<String,String> filters) async{
-    String str="&&";
-    int i=0;
-    
-    filters.forEach((key, value) {
-      if(i>0)
-      {
-        str+="&&";
-      }
-      str += key+"="+value;
-      i++;
-    });
+  //Fetch user list from API Service
+  Future <void> _fetchUserList(HashMap<String,String> filters,pageNo) async{
     try {
-      final http.Response response = await http.get("${Constants.userFetchURL}?page=${_pageNo}${(str.length>2)?str:''}");
-      List<User> fetchedUsers =  parseUsersList(response.body);
-      setState(() {
+      APIService.fetchUserList(filters, pageNo).then((fetchedUsers) => {
+        setState(() {
           _hasMore = fetchedUsers.length == _defaultUsersPerPageCount;
           _loading = false;
           _pageNo = _pageNo + 1;
           _users.addAll(fetchedUsers);
+        })
       });
     }
     catch(e)
@@ -140,7 +128,7 @@ class _LazyListViewState extends State<LazyListView>{
     _loading = true;
     _pageNo = 1;
     _users = [];
-    _fetchUserList(filters);
+    _fetchUserList(filters,_pageNo);
     _scrollController = ScrollController();
   }
 
@@ -152,7 +140,7 @@ class _LazyListViewState extends State<LazyListView>{
       _loading = true;
       _pageNo=1;
     });
-    _fetchUserList(filters);
+    _fetchUserList(filters,_pageNo);
   }
 
    void _applyFilters(HashMap<String,String> newFilters)
@@ -182,7 +170,7 @@ class _LazyListViewState extends State<LazyListView>{
               setState(() {
                 _loading = true;
                 _error = false;
-                _fetchUserList(filters);
+                _fetchUserList(filters,_pageNo);
               });
             },
             child: Padding(
@@ -205,7 +193,7 @@ class _LazyListViewState extends State<LazyListView>{
                     itemBuilder:(context,index){
                     
                         if (index == _users.length - _nextPageThreshold) {
-                          _fetchUserList(filters);
+                          _fetchUserList(filters,_pageNo);
                         }
                           if (index == _users.length) {
                             if (_error) {
@@ -215,7 +203,7 @@ class _LazyListViewState extends State<LazyListView>{
                                   setState(() {
                                     _loading = true;
                                     _error = false;
-                                    _fetchUserList(filters);
+                                    _fetchUserList(filters,_pageNo);
                                   });
                                 },
                                 child: Padding(
