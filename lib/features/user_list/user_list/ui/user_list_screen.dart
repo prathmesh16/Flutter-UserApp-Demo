@@ -5,22 +5,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_userapp_demo/data/network/api_service.dart';
 
-import '../../common/models/user.dart';
-import '../../paginated_list_view/ui/paginated_list_view_screen.dart';
+import '../../../common/models/user.dart';
+import '../../paginated_user_list/ui/paginated_user_list_screen.dart';
 import 'widgets/pagination.dart';
-import '../../common/widgets/user_card.dart';
-import '../../common/widgets/pop_up_dialog_add_user.dart';
-import '../../common/widgets/pop_up_dialog_filters.dart';
+import '../../../common/widgets/user_card.dart';
+import '../../../common/widgets/pop_up_dialog_add_user.dart';
+import '../../../common/widgets/pop_up_dialog_filters.dart';
 
 //Lazy ListView Sceen
-class LazyListViewScreen extends StatefulWidget {
+class UserListScreen extends StatefulWidget {
   @override
-  _LazyListViewScreenState createState() =>_LazyListViewScreenState();
+  _UserListScreenState createState() =>_UserListScreenState();
 }
 
-class _LazyListViewScreenState extends State<LazyListViewScreen> {
+class _UserListScreenState extends State<UserListScreen> {
 
-  final GlobalKey<_LazyListViewState> _lazyListViewState = GlobalKey<_LazyListViewState>();
+  final GlobalKey<_UserListState> _lazyListViewState = GlobalKey<_UserListState>();
   void applyFilters(HashMap<String,String> newFIlters)
   {
     _lazyListViewState.currentState._applyFilters(newFIlters);
@@ -35,7 +35,7 @@ class _LazyListViewScreenState extends State<LazyListViewScreen> {
             new IconButton(
                   icon: Icon(Icons.autorenew_sharp,size: 30,),
                   onPressed: (){
-                     Navigator.of(context).push(MaterialPageRoute(builder: (context) => PaginatedListViewScreen()));
+                     Navigator.of(context).push(MaterialPageRoute(builder: (context) => PaginatedUserListScreen()));
                   }
                 ),
             new Stack(
@@ -80,9 +80,9 @@ class LazyListView extends StatefulWidget{
 
   LazyListView({Key key}) : super(key:key);   
   @override
-  _LazyListViewState createState() =>_LazyListViewState();
+  _UserListState createState() =>_UserListState();
 }
-class _LazyListViewState extends State<LazyListView>{
+class _UserListState extends State<LazyListView>{
   int _pageNo;
   int totalPages ;
   bool _hasMore;
@@ -97,7 +97,7 @@ class _LazyListViewState extends State<LazyListView>{
 
   //Fetch user list from API Service
   Future <void> _fetchUserList(HashMap<String,String> filters,pageNo) async{
-    try {
+
       APIService.fetchUserList(filters, pageNo).then((fetchedUsers) => {
         setState(() {
           _hasMore = fetchedUsers.length == _defaultUsersPerPageCount;
@@ -105,15 +105,12 @@ class _LazyListViewState extends State<LazyListView>{
           _pageNo = _pageNo + 1;
           _users.addAll(fetchedUsers);
         })
-      });
-    }
-    catch(e)
-    {
+      }).catchError((e)=>{
         setState(() {
           _loading = false;
           _error = true;
-        });
-    }
+        })
+      });
   }
 
  ScrollController _scrollController ;
@@ -164,20 +161,20 @@ class _LazyListViewState extends State<LazyListView>{
             child: CircularProgressIndicator(),
           ));
         } else if (_error) {
-          return Center(
-              child: InkWell(
-            onTap: () {
-              setState(() {
-                _loading = true;
-                _error = false;
-                _fetchUserList(filters,_pageNo);
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text("Error while loading photos, tap to try agin"),
-            ),
-          ));
+          return Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children:<Widget> [
+                    Image.asset("assets/network_error.png"),
+                    Text("Please check internet connection!"),
+                    TextButton(
+                      onPressed: _refreshPage,
+                      child:Text("Try again" ,style: TextStyle(color: Colors.blue),),
+                    ),
+                  ],
+                  ),
+                );
         }
       } else {
           return Stack(
@@ -197,20 +194,20 @@ class _LazyListViewState extends State<LazyListView>{
                         }
                           if (index == _users.length) {
                             if (_error) {
-                              return Center(
-                                  child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _loading = true;
-                                    _error = false;
-                                    _fetchUserList(filters,_pageNo);
-                                  });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Text("Error while loading photos, tap to try agin"),
-                                ),
-                              ));
+                              return Container(
+                                alignment: Alignment.center,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children:<Widget> [
+                                    Image.asset("assets/network_error.png"),
+                                    Text("Please check internet connection!"),
+                                    TextButton(
+                                      onPressed: _refreshPage,
+                                      child:Text("Try again" ,style: TextStyle(color: Colors.blue),),
+                                    ),
+                                 ],
+                               ),
+                              );
                             } else {
                               return Center(
                                   child: Padding(

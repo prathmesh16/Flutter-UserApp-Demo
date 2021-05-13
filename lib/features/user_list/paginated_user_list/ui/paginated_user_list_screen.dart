@@ -4,23 +4,23 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../data/network/api_service.dart';
-import './widgets/pagination.dart';
-import '../../common/models/user.dart';
-import '../../common/widgets/user_card.dart';
-import '../../common/widgets/pop_up_dialog_add_user.dart';
-import '../../common/widgets/pop_up_dialog_filters.dart';
+import '../../../../data/network/api_service.dart';
+import 'widgets/pagination.dart';
+import '../../../common/models/user.dart';
+import '../../../common/widgets/user_card.dart';
+import '../../../common/widgets/pop_up_dialog_add_user.dart';
+import '../../../common/widgets/pop_up_dialog_filters.dart';
 import '../models/paging_helper.dart';
 
 //Paginated ListView Screen
-class PaginatedListViewScreen extends StatefulWidget {
+class PaginatedUserListScreen extends StatefulWidget {
   @override
-  _PaginatedListViewScreenState createState() =>_PaginatedListViewScreenState();
+  _PaginatedUserListScreenState createState() =>_PaginatedUserListScreenState();
 }
 
-class _PaginatedListViewScreenState extends State<PaginatedListViewScreen> {
+class _PaginatedUserListScreenState extends State<PaginatedUserListScreen> {
 
-  final GlobalKey<_PaginatedListViewState> _paginatedListViewState = GlobalKey<_PaginatedListViewState>();
+  final GlobalKey<_PaginatedUserListState> _paginatedListViewState = GlobalKey<_PaginatedUserListState>();
   void applyFilters(HashMap<String,String> newFIlters)
   {
     _paginatedListViewState.currentState._applyFilters(newFIlters);
@@ -75,10 +75,10 @@ class PaginatedListView extends StatefulWidget{
 
   PaginatedListView({Key key}) : super(key:key);   
   @override
-  _PaginatedListViewState createState() =>_PaginatedListViewState();
+  _PaginatedUserListState createState() =>_PaginatedUserListState();
 }
 
-class _PaginatedListViewState extends State<PaginatedListView>{
+class _PaginatedUserListState extends State<PaginatedListView>{
 
   PagingHelper _pagingHelper = new PagingHelper(pageNo: 1,totalPages: 0);
 
@@ -249,7 +249,20 @@ class _PaginatedListViewState extends State<PaginatedListView>{
                   onRefresh:()async{ _refreshPage();},
                 );
                 } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
+                  return Container(
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children:<Widget> [
+                        Image.asset("assets/network_error.png"),
+                        Text("${snapshot.error}"),
+                        TextButton(
+                          onPressed: _refreshPage,
+                          child:Text("Try again" ,style: TextStyle(color: Colors.blue),),
+                        ),
+                      ],
+                    ),
+                  );
                 }
             }
             // By default, show a loading spinner.

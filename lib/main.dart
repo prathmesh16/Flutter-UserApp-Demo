@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_userapp_demo/data/constants/app_theme.dart';
 
-import 'features/lazy_list_view/ui/lazy_list_view_screen.dart';
+import './data/constants/app_theme.dart';
+import 'features/user_list/lazy_list_view/ui/user_list_screen.dart';
 
 void main() => runApp(Application());
 
@@ -19,7 +19,7 @@ class _ApplicationState extends State<Application> {
     return MaterialApp(
       title: 'Welcome to Flutter',
       theme: themeData,
-      home: LazyListViewScreen(), 
+      home: UserListScreen(), 
     );
   }
 }

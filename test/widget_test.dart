@@ -8,12 +8,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_userapp_demo/features/lazy_list_view/ui/lazy_list_view_screen.dart';
+import 'package:flutter_userapp_demo/features/user_list/user_list/ui/user_list_screen.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(LazyListViewScreen());
+    await tester.pumpWidget(UserListScreen());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

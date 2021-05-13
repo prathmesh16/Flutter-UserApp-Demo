@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
@@ -7,7 +8,7 @@ import 'package:http/http.dart' as http;
 import '../../data/utility/utility.dart';
 import '../../features/common/models/user.dart';
 import '../../data/constants/api_constants.dart';
-import '../../features/paginated_list_view/models/paging_helper.dart';
+import '../../features/user_list/paginated_user_list/models/paging_helper.dart';
 
 class APIService{
 
@@ -73,18 +74,23 @@ class APIService{
       i++;
     });
 
-    final http.Response response = await http.get("${Constants.userFetchURL}?page=${pagingHelper.pageNo}${(str.length>2)?str:''}");
-    
-    var tmp =json.decode(response.body);
-    pagingHelper.totalPages = tmp["meta"]["pagination"]["pages"];
+    try{
+      final http.Response response = await http.get("${Constants.userFetchURL}?page=${pagingHelper.pageNo}${(str.length>2)?str:''}");
+      
+      var tmp =json.decode(response.body);
+      pagingHelper.totalPages = tmp["meta"]["pagination"]["pages"];
 
-    if(pagingHelper.totalPages<pagingHelper.pageNo)
-    {
-      pagingHelper.pageNo=pagingHelper.totalPages;
-      refreshPageCallback();
+      if(pagingHelper.totalPages<pagingHelper.pageNo)
+      {
+        pagingHelper.pageNo=pagingHelper.totalPages;
+        refreshPageCallback();
+      }
+      
+      return compute(parseUsersList,response.body);
+    }catch(e) {
+      print('error');
+      return Future.error("Please check internet connection!");
     }
-    
-    return compute(parseUsersList,response.body);
   }
 
   //PUT request to update user
