@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
 import 'package:toast/toast.dart';
 
 
@@ -124,11 +124,15 @@ class _UserCardState extends State<UserCard>
               ),    
               Row(
                 children: [
-                  IconButton(
-                    iconSize: 20,
-                    icon: Icon(Icons.info_outline,color: Colors.grey[500]),
-                    alignment: Alignment.centerRight,
+                  Tooltip(
+                      message: "Created at: ${DateFormat.yMd().add_jm().format(DateTime.parse(user.createdAt))}\nUpdated at: ${DateFormat.yMd().add_jm().format(DateTime.parse(user.updatedAt))}",
+                      child: IconButton(
+                      iconSize: 20,
+                      icon: Icon(Icons.info_outline,color: Colors.grey[500]),
+                      alignment: Alignment.centerRight,
+                    ),
                   ),
+                  
                   _dropDownOptions(),
                 ],
               ),    
