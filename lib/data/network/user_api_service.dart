@@ -13,7 +13,7 @@ import '../../features/user_list/paginated_user_list/models/paging_helper.dart';
 class UserApiService{
 
   //POST request to add user
-  static Future<String> addUserRequest(User user) async {
+  Future<String> addUserRequest(User user) async {
     final http.Response response = await http.post(Constants.userAddURL,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -43,7 +43,7 @@ class UserApiService{
   }
 
   //GET request to fetch users list
-  static Future <List<User>> fetchUserList(HashMap<String,String> filters,int pageNo) async{
+  Future <List<User>> fetchUserList(HashMap<String,String> filters,int pageNo) async{
     String str="&&";
       int i=0;
       
@@ -61,7 +61,7 @@ class UserApiService{
   }
 
   //GET request to fetch paginated users list
-  static Future <List<User>> fetchPaginatedUserList(HashMap<String,String> filters,PagingHelper pagingHelper,var refreshPageCallback) async{
+  Future <List<User>> fetchPaginatedUserList(HashMap<String,String> filters,PagingHelper pagingHelper,var refreshPageCallback) async{
     String str="&&";
     int i=0;
     
@@ -94,7 +94,7 @@ class UserApiService{
   }
 
   //PUT request to update user
-  static Future<void> updateUserRequest(User user,var callback) async {
+  Future<void> updateUserRequest(User user,var callback) async {
     final http.Response response = await http.put("${Constants.userEditURL}/${user.id}",
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -129,7 +129,7 @@ class UserApiService{
   }
 
   //DELETE request to delete user
-  static Future<String> deleteUserRequest(int id)async{
+  Future<String> deleteUserRequest(int id)async{
 
     final http.Response response = await http.delete("${Constants.userDeleteURL}/${id}",
     headers: <String, String>{

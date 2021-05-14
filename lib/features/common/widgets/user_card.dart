@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:toast/toast.dart';
 
 
-import '../../../data/network/user_api_service.dart';
+import '../../../data/repository/user_repository.dart';
 import '../../common/models/user.dart';
 import './pop_up_dialog_edit_user.dart';
 
@@ -23,11 +24,14 @@ class _UserCardState extends State<UserCard>
   BuildContext homeContext;
   User user;
   var callback;
+  
+  UserRepository userRepository = new UserRepository();
+
   _UserCardState({this.homeContext,this.user,this.callback});
   
   //Deletes user using API Service
   Future<void> _deleteUser(BuildContext context,int id)async{
-    await UserApiService.deleteUserRequest(id).then((message) => { 
+    await userRepository.deleteUserRequest(id).then((message) => { 
       Toast.show(message, context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM)
     });
   }

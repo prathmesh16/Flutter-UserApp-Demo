@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:toast/toast.dart';
 
-import '../../../data/network/user_api_service.dart';
+import '../../../data/repository/user_repository.dart';
 import '../../common/models/user.dart';
 
 
@@ -27,6 +27,8 @@ class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
   BuildContext context;
   var callback ;
 
+  UserRepository userRepository = new UserRepository();
+
   _PopUpDialogEditUserState({this.context,this.user,this.callback});
  
   @override
@@ -48,7 +50,7 @@ class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
         gender: dropdownValue
       );
 
-      UserApiService.updateUserRequest(updatedUser, (message,user)=>{
+      userRepository.updateUserRequest(updatedUser, (message,user)=>{
         if(user!=null)
           callback(user),
         Toast.show(message??"", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER),

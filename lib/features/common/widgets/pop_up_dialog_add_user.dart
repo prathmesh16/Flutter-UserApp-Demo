@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:toast/toast.dart';
 
-import '../../../data/network/user_api_service.dart';
+import '../../../data/repository/user_repository.dart';
 import '../models/user.dart';
 
 class PopUpDialogAddUser extends StatefulWidget{
@@ -23,6 +23,8 @@ class _PopUpDialogAddUserState extends State<PopUpDialogAddUser>{
   String dropdownValue = 'Gender';
   BuildContext context;
 
+  UserRepository userRepository = new UserRepository();
+
   _PopUpDialogAddUserState({this.context});
   
   @override
@@ -38,7 +40,7 @@ class _PopUpDialogAddUserState extends State<PopUpDialogAddUser>{
         gender: dropdownValue
       );
 
-      UserApiService.addUserRequest(user).then((message) => {
+      userRepository.addUserRequest(user).then((message) => {
         Toast.show(message, context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER),
         if(message=="User added!")
           Navigator.of(context).pop()

@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../data/network/user_api_service.dart';
+import '../../../../data/repository/user_repository.dart';
 import './widgets/pagination.dart';
 import '../../../common/models/user.dart';
 import '../../../common/widgets/user_card.dart';
@@ -82,6 +82,8 @@ class _PaginatedUserListState extends State<PaginatedListView>{
 
   PagingHelper _pagingHelper = new PagingHelper(pageNo: 1,totalPages: 0);
 
+  UserRepository userRepository = new UserRepository();
+
   Future<List<User>> _futureUserList ;
   HashMap<String,String> filters = new HashMap<String, String>();
 
@@ -90,7 +92,7 @@ class _PaginatedUserListState extends State<PaginatedListView>{
 
   //Fetch paginated users list from API Service
   Future<List<User>> _fetchUserList(HashMap<String,String> filters) async{
-    return UserApiService.fetchPaginatedUserList(filters, _pagingHelper,_refreshPage); 
+    return await userRepository.fetchPaginatedUserList(filters, _pagingHelper, _refreshPage);
   }
   
   @override

@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../data/network/user_api_service.dart';
+import '../../../../data/repository/user_repository.dart';
 import '../../../common/models/user.dart';
 import '../../paginated_user_list/ui/paginated_user_list_screen.dart';
 import './widgets/pagination.dart';
@@ -94,11 +94,12 @@ class _UserListState extends State<LazyListView>{
   final int _nextPageThreshold = 2;
   HashMap<String,String> filters = new HashMap<String, String>();
 
+  UserRepository userRepository = new UserRepository();
 
   //Fetch user list from API Service
   Future <void> _fetchUserList(HashMap<String,String> filters,pageNo) async{
 
-      UserApiService.fetchUserList(filters, pageNo).then((fetchedUsers) => {
+      userRepository.fetchUserList(filters, pageNo).then((fetchedUsers) => {
         setState(() {
           _hasMore = fetchedUsers.length == _defaultUsersPerPageCount;
           _loading = false;
