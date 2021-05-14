@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_userapp_demo/data/network/api_service.dart';
 import 'package:toast/toast.dart';
 
+
+import '../../../data/network/user_api_service.dart';
 import '../../common/models/user.dart';
 import './pop_up_dialog_edit_user.dart';
 
@@ -26,7 +27,7 @@ class _UserCardState extends State<UserCard>
   
   //Deletes user using API Service
   Future<void> _deleteUser(BuildContext context,int id)async{
-    await APIService.deleteUserRequest(id).then((message) => { 
+    await UserApiService.deleteUserRequest(id).then((message) => { 
       Toast.show(message, context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM)
     });
   }

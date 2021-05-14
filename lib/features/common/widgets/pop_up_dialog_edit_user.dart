@@ -1,15 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_userapp_demo/data/network/api_service.dart';
-import 'package:http/http.dart' as http;
 import 'package:toast/toast.dart';
 
-import '../../../data/constants/api_constants.dart';
+import '../../../data/network/user_api_service.dart';
 import '../../common/models/user.dart';
-
-
 
 
 class PopUpDialogEditUser extends StatefulWidget{
@@ -54,7 +48,7 @@ class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
         gender: dropdownValue
       );
 
-      APIService.updateUserRequest(updatedUser, (message,user)=>{
+      UserApiService.updateUserRequest(updatedUser, (message,user)=>{
         if(user!=null)
           callback(user),
         Toast.show(message??"", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER),

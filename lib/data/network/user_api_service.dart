@@ -7,10 +7,10 @@ import 'package:http/http.dart' as http;
 
 import '../../data/utility/utility.dart';
 import '../../features/common/models/user.dart';
-import '../../data/constants/api_constants.dart';
+import '../../data/constants/user_api_constants.dart';
 import '../../features/user_list/paginated_user_list/models/paging_helper.dart';
 
-class APIService{
+class UserApiService{
 
   //POST request to add user
   static Future<String> addUserRequest(User user) async {

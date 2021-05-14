@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../data/network/api_service.dart';
-import 'widgets/pagination.dart';
+import '../../../../data/network/user_api_service.dart';
+import './widgets/pagination.dart';
 import '../../../common/models/user.dart';
 import '../../../common/widgets/user_card.dart';
 import '../../../common/widgets/pop_up_dialog_add_user.dart';
@@ -90,7 +90,7 @@ class _PaginatedUserListState extends State<PaginatedListView>{
 
   //Fetch paginated users list from API Service
   Future<List<User>> _fetchUserList(HashMap<String,String> filters) async{
-    return APIService.fetchPaginatedUserList(filters, _pagingHelper,_refreshPage); 
+    return UserApiService.fetchPaginatedUserList(filters, _pagingHelper,_refreshPage); 
   }
   
   @override
