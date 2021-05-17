@@ -84,7 +84,7 @@ class _PaginatedUserListState extends State<PaginatedListView>{
   PagingHelper _pagingHelper = new PagingHelper(pageNo: 1,totalPages: 0);
 
   UserRepository userRepository = new UserRepository();
-
+  
   Future<List<User>> _futureUserList ;
   HashMap<String,String> filters = new HashMap<String, String>();
 
@@ -119,7 +119,7 @@ class _PaginatedUserListState extends State<PaginatedListView>{
       if(_pagingHelper.pageNo>1)
       {
         _pagingHelper.pageNo-=1;
-          _futureUserList =_fetchUserList(filters:filters);
+        _futureUserList =_fetchUserList(filters:filters);
       }
     });
   }
@@ -128,13 +128,13 @@ class _PaginatedUserListState extends State<PaginatedListView>{
   {
      setState(() {
       _pagingHelper.pageNo=page;
-        _futureUserList =_fetchUserList(filters:filters);
+      _futureUserList =_fetchUserList(filters:filters);
     });
   }
 
   void _refreshPage(){
     setState(() {
-        _futureUserList =_fetchUserList(filters:filters);
+       _futureUserList =_fetchUserList(filters:filters);
     });
   }
 

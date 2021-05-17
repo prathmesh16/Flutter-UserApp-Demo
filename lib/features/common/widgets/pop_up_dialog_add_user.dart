@@ -24,7 +24,6 @@ class _PopUpDialogAddUserState extends State<PopUpDialogAddUser>{
   BuildContext context;
 
   UserRepository userRepository = new UserRepository();
-
   _PopUpDialogAddUserState({this.context});
   
   @override

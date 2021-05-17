@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:toast/toast.dart';
 
-
 import '../../../data/repository/user_repository.dart';
 import '../../common/models/user.dart';
 import './pop_up_dialog_edit_user.dart';
-
 
 
 class UserCard extends StatefulWidget{
@@ -26,7 +24,7 @@ class _UserCardState extends State<UserCard>
   var callback;
   
   UserRepository userRepository = new UserRepository();
-
+  
   _UserCardState({this.homeContext,this.user,this.callback});
   
   //Deletes user using API Service
@@ -132,7 +130,6 @@ class _UserCardState extends State<UserCard>
                       alignment: Alignment.centerRight,
                     ),
                   ),
-                  
                   _dropDownOptions(),
                 ],
               ),    

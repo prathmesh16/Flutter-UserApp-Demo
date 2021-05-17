@@ -5,7 +5,6 @@ import 'package:toast/toast.dart';
 import '../../../data/repository/user_repository.dart';
 import '../../common/models/user.dart';
 
-
 class PopUpDialogEditUser extends StatefulWidget{
   BuildContext context;
   User user;
@@ -28,7 +27,6 @@ class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
   var callback ;
 
   UserRepository userRepository = new UserRepository();
-
   _PopUpDialogEditUserState({this.context,this.user,this.callback});
  
   @override
