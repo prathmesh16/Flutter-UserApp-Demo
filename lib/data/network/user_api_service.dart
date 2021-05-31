@@ -10,143 +10,131 @@ import '../../features/common/models/user.dart';
 import '../../data/constants/user_api_constants.dart';
 import '../../features/user_list/paginated_user_list/models/paging_helper.dart';
 
-class UserApiService{
-
+class UserApiService {
   //POST request to add user
   Future<String> addUserRequest(User user) async {
-    final http.Response response = await http.post(Constants.userAddURL,
+    final http.Response response = await http.post(
+      Constants.userAddURL,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization':'Bearer ${Constants.token}'
+        'Authorization': 'Bearer ${Constants.token}'
       },
       body: jsonEncode(<String, String>{
-        "name":user.name,
-        "email":user.email,
-        "status":user.status,
-        "gender":user.gender
+        "name": user.name,
+        "email": user.email,
+        "status": user.status,
+        "gender": user.gender
       }),
     );
     var tmp = json.decode(response.body);
-    if(tmp["code"]==201)
-    {
+    if (tmp["code"] == 201) {
       return Future.value("User added!");
-    }
-    else
-    {
-      try{
-        return Future.value(tmp["data"][0]["field"]+" "+tmp["data"][0]["message"]);
-      }
-      catch(e){
+    } else {
+      try {
+        return Future.value(
+            tmp["data"][0]["field"] + " " + tmp["data"][0]["message"]);
+      } catch (e) {
         return Future.value("Something went wrong please try again!");
       }
     }
   }
 
   //GET request to fetch users list
-  Future <List<User>> fetchUserList(HashMap<String,String> filters,int pageNo) async{
-    String str="&&";
-      int i=0;
-      
-      filters.forEach((key, value) {
-        if(i>0)
-        {
-          str+="&&";
-        }
-        str += key+"="+value;
-        i++;
-      });
+  Future<List<User>> fetchUserList(
+      HashMap<String, String> filters, int pageNo) async {
+    String str = "&&";
+    int i = 0;
 
-      final http.Response response = await http.get("${Constants.userFetchURL}?page=${pageNo}${(str.length>2)?str:''}");
-      return compute(parseUsersList,response.body);
-  }
-
-  //GET request to fetch paginated users list
-  Future <List<User>> fetchPaginatedUserList(HashMap<String,String> filters,PagingHelper pagingHelper,var refreshPageCallback) async{
-    String str="&&";
-    int i=0;
-    
     filters.forEach((key, value) {
-      if(i>0)
-      {
-        str+="&&";
+      if (i > 0) {
+        str += "&&";
       }
-      str += key+"="+value;
+      str += key + "=" + value;
       i++;
     });
 
-    try{
-      final http.Response response = await http.get("${Constants.userFetchURL}?page=${pagingHelper.pageNo}${(str.length>2)?str:''}");
-      
-      var tmp =json.decode(response.body);
+    final http.Response response = await http.get(
+        "${Constants.userFetchURL}?page=${pageNo}${(str.length > 2) ? str : ''}");
+    return compute(parseUsersList, response.body);
+  }
+
+  //GET request to fetch paginated users list
+  Future<List<User>> fetchPaginatedUserList(HashMap<String, String> filters,
+      PagingHelper pagingHelper, var refreshPageCallback) async {
+    String str = "&&";
+    int i = 0;
+
+    filters.forEach((key, value) {
+      if (i > 0) {
+        str += "&&";
+      }
+      str += key + "=" + value;
+      i++;
+    });
+
+    try {
+      final http.Response response = await http.get(
+          "${Constants.userFetchURL}?page=${pagingHelper.pageNo}${(str.length > 2) ? str : ''}");
+
+      var tmp = json.decode(response.body);
       pagingHelper.totalPages = tmp["meta"]["pagination"]["pages"];
 
-      if(pagingHelper.totalPages<pagingHelper.pageNo)
-      {
-        pagingHelper.pageNo=pagingHelper.totalPages;
+      if (pagingHelper.totalPages < pagingHelper.pageNo) {
+        pagingHelper.pageNo = pagingHelper.totalPages;
         refreshPageCallback();
       }
-      
-      return compute(parseUsersList,response.body);
-    }catch(e) {
+
+      return compute(parseUsersList, response.body);
+    } catch (e) {
       print('error');
       return Future.error("Please check internet connection!");
     }
   }
 
   //PUT request to update user
-  Future<void> updateUserRequest(User user,var callback) async {
-    final http.Response response = await http.put("${Constants.userEditURL}/${user.id}",
+  Future<void> updateUserRequest(User user, var callback) async {
+    final http.Response response = await http.put(
+      "${Constants.userEditURL}/${user.id}",
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization':'Bearer ${Constants.token}'
+        'Authorization': 'Bearer ${Constants.token}'
       },
       body: jsonEncode(<String, String>{
-        "name":user.name,
-        "email":user.email,
-        "status":user.status,
-        "gender":user.gender
+        "name": user.name,
+        "email": user.email,
+        "status": user.status,
+        "gender": user.gender
       }),
     );
     var tmp = json.decode(response.body);
-    if(tmp["code"]==200)
-    {
-       try{
-        callback("User updated!",User.fromJson(tmp["data"]));
+    if (tmp["code"] == 200) {
+      try {
+        callback("User updated!", User.fromJson(tmp["data"]));
+      } catch (e) {
+        callback("Something went wrong please try again!", null);
       }
-      catch(e){
-        callback("Something went wrong please try again!",null);
-      }  
-    }
-    else
-    {
-      try{
-        callback(tmp["data"][0]["field"]+" "+tmp["data"][0]["message"],null);
-      }
-      catch(e){
-        callback("Something went wrong please try again!",null);
+    } else {
+      try {
+        callback(
+            tmp["data"][0]["field"] + " " + tmp["data"][0]["message"], null);
+      } catch (e) {
+        callback("Something went wrong please try again!", null);
       }
     }
   }
 
   //DELETE request to delete user
-  Future<String> deleteUserRequest(int id)async{
-
-    final http.Response response = await http.delete("${Constants.userDeleteURL}/${id}",
-    headers: <String, String>{
-          'Authorization':'Bearer ${Constants.token}'
-        },
+  Future<String> deleteUserRequest(int id) async {
+    final http.Response response = await http.delete(
+      "${Constants.userDeleteURL}/${id}",
+      headers: <String, String>{'Authorization': 'Bearer ${Constants.token}'},
     );
 
     var res = json.decode(response.body);
-    if(res["code"]==204)
-    {
+    if (res["code"] == 204) {
       return Future.value("User deleted!");
-    }
-    else
-    {
+    } else {
       return Future.value(res["data"]["message"]);
     }
   }
-
-  
 }

@@ -5,17 +5,17 @@ import 'package:toast/toast.dart';
 import '../../../data/repository/user_repository.dart';
 import '../models/user.dart';
 
-class PopUpDialogAddUser extends StatefulWidget{
+class PopUpDialogAddUser extends StatefulWidget {
   final BuildContext context;
 
   PopUpDialogAddUser({this.context});
-  
+
   @override
-  _PopUpDialogAddUserState createState() => _PopUpDialogAddUserState(context:context);
+  _PopUpDialogAddUserState createState() =>
+      _PopUpDialogAddUserState(context: context);
 }
 
-class _PopUpDialogAddUserState extends State<PopUpDialogAddUser>{
-
+class _PopUpDialogAddUserState extends State<PopUpDialogAddUser> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
 
@@ -25,30 +25,29 @@ class _PopUpDialogAddUserState extends State<PopUpDialogAddUser>{
 
   UserRepository userRepository = new UserRepository();
   _PopUpDialogAddUserState({this.context});
-  
+
   @override
   void initState() {
     super.initState();
   }
 
-  void _addUser(){
+  void _addUser() {
     User user = new User(
-        name:nameController.text,
-        email:emailController.text,
-        status: (_isActive)?"Active":"Inactive",
-        gender: dropdownValue
-      );
+        name: nameController.text,
+        email: emailController.text,
+        status: (_isActive) ? "Active" : "Inactive",
+        gender: dropdownValue);
 
-      userRepository.addUserRequest(user).then((message) => {
-        Toast.show(message, context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER),
-        if(message=="User added!")
-          Navigator.of(context).pop()
-      });
+    userRepository.addUserRequest(user).then((message) => {
+          Toast.show(message, context,
+              duration: Toast.LENGTH_SHORT, gravity: Toast.CENTER),
+          if (message == "User added!") Navigator.of(context).pop()
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-      return new AlertDialog(
+    return new AlertDialog(
       title: const Text('Add New User'),
       content: new Column(
         mainAxisSize: MainAxisSize.min,
@@ -61,7 +60,9 @@ class _PopUpDialogAddUserState extends State<PopUpDialogAddUser>{
               labelText: 'Name',
             ),
           ),
-          SizedBox(height: 10,),
+          SizedBox(
+            height: 10,
+          ),
           TextField(
             controller: emailController,
             decoration: InputDecoration(
@@ -69,25 +70,25 @@ class _PopUpDialogAddUserState extends State<PopUpDialogAddUser>{
               labelText: 'Email',
             ),
           ),
-          SizedBox(height:10),
+          SizedBox(height: 10),
           Row(
             children: <Widget>[
               Switch(
                 value: _isActive,
-                onChanged: (value){
+                onChanged: (value) {
                   setState(() {
-                    _isActive=value;
+                    _isActive = value;
                   });
                 },
                 activeTrackColor: Colors.lightBlue,
                 activeColor: Colors.lightBlueAccent,
-                ),
-                SizedBox(width:10),
-                Text((_isActive)?"Active":"Inactive"),
+              ),
+              SizedBox(width: 10),
+              Text((_isActive) ? "Active" : "Inactive"),
             ],
           ),
           Container(
-            margin:EdgeInsets.only(left:20),
+            margin: EdgeInsets.only(left: 20),
             child: DropdownButton<String>(
               value: dropdownValue,
               iconSize: 24,
@@ -111,26 +112,20 @@ class _PopUpDialogAddUserState extends State<PopUpDialogAddUser>{
       ),
       actions: <Widget>[
         new TextButton(
-          onPressed : (){
+          onPressed: () {
             _addUser();
-             },
-          style: TextButton.styleFrom(
-            primary:Theme.of(context).primaryColor
-          ),
+          },
+          style: TextButton.styleFrom(primary: Theme.of(context).primaryColor),
           child: const Text('Add'),
         ),
         new TextButton(
           onPressed: () {
             Navigator.of(context).pop();
           },
-          style: TextButton.styleFrom(
-            primary:Theme.of(context).primaryColor
-          ),
+          style: TextButton.styleFrom(primary: Theme.of(context).primaryColor),
           child: const Text('Close'),
         ),
       ],
     );
   }
-
-
 }

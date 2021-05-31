@@ -5,60 +5,61 @@ import 'package:toast/toast.dart';
 import '../../../data/repository/user_repository.dart';
 import '../../common/models/user.dart';
 
-class PopUpDialogEditUser extends StatefulWidget{
+class PopUpDialogEditUser extends StatefulWidget {
   BuildContext context;
   User user;
 
   var callback;
-  
-  PopUpDialogEditUser({this.context,this.user,this.callback});
-  
+
+  PopUpDialogEditUser({this.context, this.user, this.callback});
+
   @override
-  _PopUpDialogEditUserState createState() => _PopUpDialogEditUserState(context:context,user: user,callback:callback);
+  _PopUpDialogEditUserState createState() => _PopUpDialogEditUserState(
+      context: context, user: user, callback: callback);
 }
 
-class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
+class _PopUpDialogEditUserState extends State<PopUpDialogEditUser> {
   User user;
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   bool _isActive = false;
   String dropdownValue = 'Gender';
   BuildContext context;
-  var callback ;
+  var callback;
 
   UserRepository userRepository = new UserRepository();
-  _PopUpDialogEditUserState({this.context,this.user,this.callback});
- 
+  _PopUpDialogEditUserState({this.context, this.user, this.callback});
+
   @override
   void initState() {
     super.initState();
     nameController.text = user.name;
     emailController.text = user.email;
-    _isActive = (user.status=="Active")?true:false;
+    _isActive = (user.status == "Active") ? true : false;
     dropdownValue = user.gender;
   }
 
-  void _updateUser(){
-    
+  void _updateUser() {
     User updatedUser = new User(
-        id:user.id,
-        name:(nameController.text)??"",
-        email:emailController.text??"",
-        status: (_isActive)?"Active":"Inactive",
-        gender: dropdownValue
-      );
+        id: user.id,
+        name: (nameController.text) ?? "",
+        email: emailController.text ?? "",
+        status: (_isActive) ? "Active" : "Inactive",
+        gender: dropdownValue);
 
-      userRepository.updateUserRequest(updatedUser, (message,user)=>{
-        if(user!=null)
-          callback(user),
-        Toast.show(message??"", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER),
-        Navigator.of(context).pop()  
-      });
+    userRepository.updateUserRequest(
+        updatedUser,
+        (message, user) => {
+              if (user != null) callback(user),
+              Toast.show(message ?? "", context,
+                  duration: Toast.LENGTH_SHORT, gravity: Toast.CENTER),
+              Navigator.of(context).pop()
+            });
   }
 
   @override
   Widget build(BuildContext context) {
-      return new AlertDialog(
+    return new AlertDialog(
       title: const Text('Edit User'),
       content: new Column(
         mainAxisSize: MainAxisSize.min,
@@ -71,7 +72,9 @@ class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
               labelText: 'Name',
             ),
           ),
-          SizedBox(height: 10,),
+          SizedBox(
+            height: 10,
+          ),
           TextField(
             controller: emailController,
             decoration: InputDecoration(
@@ -79,25 +82,25 @@ class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
               labelText: 'Email',
             ),
           ),
-          SizedBox(height:10),
+          SizedBox(height: 10),
           Row(
             children: <Widget>[
               Switch(
                 value: _isActive,
-                onChanged: (value){
+                onChanged: (value) {
                   setState(() {
-                    _isActive=value;
+                    _isActive = value;
                   });
                 },
                 activeTrackColor: Colors.lightBlue,
                 activeColor: Colors.lightBlueAccent,
-                ),
-                SizedBox(width:10),
-                Text((_isActive)?"Active":"Inactive"),
+              ),
+              SizedBox(width: 10),
+              Text((_isActive) ? "Active" : "Inactive"),
             ],
           ),
           Container(
-            margin:EdgeInsets.only(left:20),
+            margin: EdgeInsets.only(left: 20),
             child: DropdownButton<String>(
               value: dropdownValue,
               iconSize: 24,
@@ -121,21 +124,17 @@ class _PopUpDialogEditUserState extends State<PopUpDialogEditUser>{
       ),
       actions: <Widget>[
         new TextButton(
-          onPressed : (){
+          onPressed: () {
             _updateUser();
-             },
-          style: TextButton.styleFrom(
-            primary:Theme.of(context).primaryColor
-          ),
+          },
+          style: TextButton.styleFrom(primary: Theme.of(context).primaryColor),
           child: const Text('Save'),
         ),
         new TextButton(
           onPressed: () {
             Navigator.of(context).pop();
           },
-          style: TextButton.styleFrom(
-            primary:Theme.of(context).primaryColor
-          ),
+          style: TextButton.styleFrom(primary: Theme.of(context).primaryColor),
           child: const Text('Close'),
         ),
       ],

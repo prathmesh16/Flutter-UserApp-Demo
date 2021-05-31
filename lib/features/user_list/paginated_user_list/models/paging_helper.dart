@@ -1,5 +1,5 @@
-class PagingHelper{
+class PagingHelper {
   int pageNo;
   int totalPages;
-  PagingHelper({this.pageNo,this.totalPages});
+  PagingHelper({this.pageNo, this.totalPages});
 }
