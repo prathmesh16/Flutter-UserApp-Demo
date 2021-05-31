@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_userapp_demo/data/network/api_service.dart';
+import 'package:intl/intl.dart';
 import 'package:toast/toast.dart';
 
+import '../../../data/repository/user_repository.dart';
 import '../../common/models/user.dart';
 import './pop_up_dialog_edit_user.dart';
-
 
 
 class UserCard extends StatefulWidget{
@@ -22,11 +22,14 @@ class _UserCardState extends State<UserCard>
   BuildContext homeContext;
   User user;
   var callback;
+  
+  UserRepository userRepository = new UserRepository();
+  
   _UserCardState({this.homeContext,this.user,this.callback});
   
   //Deletes user using API Service
   Future<void> _deleteUser(BuildContext context,int id)async{
-    await APIService.deleteUserRequest(id).then((message) => { 
+    await userRepository.deleteUserRequest(id).then((message) => { 
       Toast.show(message, context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM)
     });
   }
@@ -119,10 +122,13 @@ class _UserCardState extends State<UserCard>
               ),    
               Row(
                 children: [
-                  IconButton(
-                    iconSize: 20,
-                    icon: Icon(Icons.info_outline,color: Colors.grey[500]),
-                    alignment: Alignment.centerRight,
+                  Tooltip(
+                      message: "Created at: ${DateFormat.yMd().add_jm().format(DateTime.parse(user.createdAt))}\nUpdated at: ${DateFormat.yMd().add_jm().format(DateTime.parse(user.updatedAt))}",
+                      child: IconButton(
+                      iconSize: 20,
+                      icon: Icon(Icons.info_outline,color: Colors.grey[500]),
+                      alignment: Alignment.centerRight,
+                    ),
                   ),
                   _dropDownOptions(),
                 ],
