@@ -1,5 +1,4 @@
-class User{
-  
+class User {
   final int id;
   final String name;
   final String email;
@@ -8,19 +7,23 @@ class User{
   final String createdAt;
   final String updatedAt;
 
-  User({this.id,this.name,this.email,this.gender,this.status,this.createdAt,this.updatedAt});
+  User(
+      {this.id,
+      this.name,
+      this.email,
+      this.gender,
+      this.status,
+      this.createdAt,
+      this.updatedAt});
 
-  factory User.fromJson(Map<String,dynamic> json)
-  {
+  factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id:json['id'],
-      name:json['name'],
-      email: json['email'],
-      gender: json['gender'],
-      status: json['status'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at']
-    );
+        id: json['id'],
+        name: json['name'],
+        email: json['email'],
+        gender: json['gender'],
+        status: json['status'],
+        createdAt: json['created_at'],
+        updatedAt: json['updated_at']);
   }
-
 }
