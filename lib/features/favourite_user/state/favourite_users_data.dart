@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_userapp_demo/features/common/models/user.dart';
 
 class FavouriteUsersData extends ChangeNotifier {
+
   Map<int, User> _favUsers = {};
+
   bool isPresent(int id) {
     return _favUsers.containsKey(id);
   }
@@ -24,5 +26,9 @@ class FavouriteUsersData extends ChangeNotifier {
 
   List<User> getFavUsers() {
     return _favUsers.entries.map((e) => e.value).toList();
+  }
+
+  void clearFavourites() {
+    _favUsers.clear();
   }
 }

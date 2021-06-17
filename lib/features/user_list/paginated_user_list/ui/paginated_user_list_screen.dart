@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_userapp_demo/data/cache/user_cache.dart';
 import 'package:flutter_userapp_demo/features/common/widgets/blank_slate.dart';
 import 'package:flutter_userapp_demo/features/common/widgets/network_error.dart';
+import 'package:flutter_userapp_demo/features/common/widgets/user_list_shimmer.dart';
 import 'package:flutter_userapp_demo/features/favourite_user/state/favourite_users_data.dart';
 import 'package:flutter_userapp_demo/features/favourite_user/ui/favourite_user_list_screen.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,11 @@ class PaginatedUserListScreen extends StatefulWidget {
 class _PaginatedUserListScreenState extends State<PaginatedUserListScreen> {
   final GlobalKey<_PaginatedUserListState> _paginatedListViewState =
       GlobalKey<_PaginatedUserListState>();
+  int filterCount = 0;
   void applyFilters(HashMap<String, String> newFIlters) {
+    setState(() {
+      filterCount = newFIlters.length;
+    });
     _paginatedListViewState.currentState._applyFilters(newFIlters);
   }
 
@@ -47,24 +52,38 @@ class _PaginatedUserListScreenState extends State<PaginatedUserListScreen> {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => FavouriteUserListScreen()));
               }),
-          new Stack(
-            children: <Widget>[
-              new IconButton(
-                  icon: Icon(
-                    Icons.filter_alt_sharp,
-                    size: 30,
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) => PopUpDialogFilters(
-                          context: context,
-                          callback: applyFilters,
-                          filters:
-                              _paginatedListViewState.currentState.filters),
-                    );
-                  }),
-            ],
+          Container(
+            margin: EdgeInsets.only(top:5),
+            child: new Stack(
+              children: <Widget>[
+                new IconButton(
+                    icon: Icon(
+                      Icons.filter_alt_sharp,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => PopUpDialogFilters(
+                            context: context,
+                            callback: applyFilters,
+                            filters:
+                                _paginatedListViewState.currentState.filters),
+                      );
+                    }),
+                    if(filterCount>0)
+                    Positioned(
+                      top:0,
+                      left:0,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.red),
+                        alignment: Alignment.center,
+                        child: Text("${filterCount}"),
+                      ),
+                    ),
+              ],
+            ),
           )
         ],
       ),
@@ -253,8 +272,8 @@ class _PaginatedUserListState extends State<PaginatedListView> {
             );
           }
         }
-        // By default, show a loading spinner.
-        return Center(child: CircularProgressIndicator());
+        // By default, show a loading shimmer effect.
+        return UserListShimmer();
       },
     );
   }

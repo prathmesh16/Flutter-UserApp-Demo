@@ -3,10 +3,17 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_userapp_demo/features/common/widgets/blank_slate.dart';
 import 'package:flutter_userapp_demo/features/common/widgets/network_error.dart';
+import 'package:flutter_userapp_demo/features/common/widgets/user_list_shimmer.dart';
 import 'package:flutter_userapp_demo/features/favourite_user/state/favourite_users_data.dart';
 import 'package:flutter_userapp_demo/features/favourite_user/ui/favourite_user_list_screen.dart';
+import 'package:flutter_userapp_demo/features/login/business_logic/bloc/auth_bloc.dart';
+import 'package:flutter_userapp_demo/features/login/business_logic/bloc/auth_event.dart';
+import 'package:flutter_userapp_demo/features/login/business_logic/bloc/auth_state.dart';
+import 'package:flutter_userapp_demo/features/login/ui/login_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../data/repository/user_repository.dart';
@@ -26,35 +33,42 @@ class UserListScreen extends StatefulWidget {
 class _UserListScreenState extends State<UserListScreen> {
   final GlobalKey<_UserListState> _lazyListViewState =
       GlobalKey<_UserListState>();
+  int filterCount = 0;    
   void applyFilters(HashMap<String, String> newFIlters) {
+    setState(() {
+      filterCount = newFIlters.length;
+    });
     _lazyListViewState.currentState._applyFilters(newFIlters);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('User App'),
-        actions: [
-          new IconButton(
-              icon: Icon(
-                Icons.favorite_rounded,
-                size: 30,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => FavouriteUserListScreen()));
-              }),
-          new IconButton(
-              icon: Icon(
-                Icons.autorenew_sharp,
-                size: 30,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => PaginatedUserListScreen()));
-              }),
-          new Stack(
+    return WillPopScope(
+    child:Scaffold(
+    appBar: AppBar(
+      title: Text('User App'),
+      actions: [
+        new IconButton(
+            icon: Icon(
+              Icons.favorite_rounded,
+              size: 30,
+            ),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => FavouriteUserListScreen(),),);
+            }),
+        new IconButton(
+            icon: Icon(
+              Icons.autorenew_sharp,
+              size: 30,
+            ),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => PaginatedUserListScreen(),),);
+            }),
+        Container(
+          margin:EdgeInsets.only(top:5),
+          child: new Stack(
             children: <Widget>[
               new IconButton(
                   icon: Icon(
@@ -69,22 +83,89 @@ class _UserListScreenState extends State<UserListScreen> {
                           callback: applyFilters,
                           filters: _lazyListViewState.currentState.filters),
                     );
-                  }),
+                  }
+                ),
+                if(filterCount>0)
+                Positioned(
+                  top:0,
+                  left:0,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.red),
+                    alignment: Alignment.center,
+                    child: Text("${filterCount}"),
+                  ),
+                ),
             ],
-          )
-        ],
+          ),
+        )
+      ],
+      leading: new IconButton(
+        icon: Icon(Icons.logout),
+        onPressed:() =>showDialog<bool>(
+          context: context,
+          builder: (c) => AlertDialog(
+            title: Text('Warning'),
+            content: Text('Do you really want to Logout?'),
+            actions: [
+              TextButton(
+                child: Text('Yes'),
+                onPressed: () =>{
+                  Provider.of<FavouriteUsersData>(context,listen: false).clearFavourites(),
+                  BlocProvider.of<AuthBloc>(context).add(LogOutEvent()),
+                }
+              ),
+              TextButton(
+                child: Text('No'),
+                onPressed: () => Navigator.pop(c, false),
+              ),
+            ],
+          ),
+        ),
       ),
-      body: LazyListView(key: _lazyListViewState),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) =>
-                PopUpDialogAddUser(context: context),
+    ),
+    body:BlocBuilder<AuthBloc,AuthState>(
+      buildWhen: (previousState, state) {
+        if (state is UnLoggedState) {
+          Navigator.pushReplacement<void,void>(context,MaterialPageRoute<void>(
+            builder: (BuildContext context) => LoginScreen(),
+            ),
           );
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
+        }
+        return;
+      },
+      builder:(context,state) {
+        return LazyListView(key: _lazyListViewState);
+      } ,
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) =>
+              PopUpDialogAddUser(context: context),
+        );
+      },
+      child: Icon(Icons.add),
+      backgroundColor: Colors.blue,
+    ),
+      ),
+      onWillPop:() => showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+    title: Text('Warning'),
+    content: Text('Do you really want to exit'),
+    actions: [
+        TextButton(
+          child: Text('Yes'),
+          onPressed: () => SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+        ),
+        TextButton(
+          child: Text('No'),
+          onPressed: () => Navigator.pop(c, false),
+        ),
+      ],
+    ),
       ),
     );
   }
@@ -170,11 +251,7 @@ class _UserListState extends State<LazyListView> {
     //ListView of users data
     if (_users.isEmpty) {
       if (_loading) {
-        return Center(
-            child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: CircularProgressIndicator(),
-        ));
+        return UserListShimmer();
       } else if (_error) {
         return NetworkError(
           message: "Please check internet connection!",

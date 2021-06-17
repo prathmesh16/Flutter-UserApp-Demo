@@ -31,7 +31,9 @@ dependencies:
   cupertino_icons: ^0.1.3
   intl: ^0.17.0
   provider: ^5.0.0
-
+  flutter_bloc: ^7.0.0
+  shared_preferences: ^2.0.6
+  shimmer: ^2.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -49,6 +51,7 @@ flutter:
   assets:
     - assets/network_error.png
     - assets/no_data.png
+    - assets/login.jpg
   # To add assets to your application, add an assets section, like this:
 
   # An image asset can refer to one or more resolution-specific "variants", see
